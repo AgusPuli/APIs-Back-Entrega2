@@ -1,10 +1,10 @@
-package com.uade.tpo.ecommerce.exceptions.dto;
+package com.uade.tpo.ecommerce.entity.dto;
 
 import lombok.Data;
 
 @Data
 public class CategoryRequest {
-    private int id;
+    private Long id;
     private String name;
     private String description;
 }
