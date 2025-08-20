@@ -3,6 +3,8 @@ import com.uade.tpo.ecommerce.entity.Category;
 import com.uade.tpo.ecommerce.exceptions.CategoryDuplicateException;
 import com.uade.tpo.ecommerce.exceptions.dto.CategoryRequest;
 import com.uade.tpo.ecommerce.service.CategoryService;
+import com.uade.tpo.ecommerce.service.CategoryServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.net.URI;
@@ -17,11 +19,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("categories")
 public class CategoriesController {
-    private CategoryService categoryService;
 
-    public CategoriesController() {
-        categoryService = new CategoryService();
-    }
+    @Autowired // genera un contenedor beans, inyecta las dependencias
+    private CategoryService categoryService;
 
     @GetMapping
     public ResponseEntity<ArrayList<Category>> getCategories() {
