@@ -6,6 +6,7 @@ import com.uade.tpo.ecommerce.exceptions.CategoryDuplicateException;
 import java.util.ArrayList;
 import java.util.Optional;
 
+
 public interface CategoryService {
 
     public ArrayList<Category> getCategories();

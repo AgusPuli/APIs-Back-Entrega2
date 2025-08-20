@@ -2,11 +2,12 @@ package com.uade.tpo.ecommerce.service;
 
 import com.uade.tpo.ecommerce.entity.Category;
 import com.uade.tpo.ecommerce.exceptions.CategoryDuplicateException;
-import com.uade.tpo.ecommerce.repository.CategoryRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Optional;
 
+@Service // esta clase va a tener la logica.
 public class CategoryServiceImpl implements CategoryService {
     private CategoryRepository categoryRepository;
 
