@@ -1,14 +1,12 @@
 package com.uade.tpo.ecommerce.controllers;
 import com.uade.tpo.ecommerce.entity.Category;
 import com.uade.tpo.ecommerce.exceptions.CategoryDuplicateException;
-import com.uade.tpo.ecommerce.exceptions.dto.CategoryRequest;
+import com.uade.tpo.ecommerce.entity.dto.CategoryRequest;
 import com.uade.tpo.ecommerce.service.CategoryService;
-import com.uade.tpo.ecommerce.service.CategoryServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.http.ResponseEntity;
