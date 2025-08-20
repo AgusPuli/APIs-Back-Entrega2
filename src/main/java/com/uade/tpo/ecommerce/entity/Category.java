@@ -1,12 +1,18 @@
 package com.uade.tpo.ecommerce.entity;
 
-import lombok.Builder;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
-@Builder
+@Entity
 public class Category {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column
     private String name;
+
+    @Column
     private String description;
 }

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,12 +25,12 @@ public class CategoriesController {
     private CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<ArrayList<Category>> getCategories() {
+    public ResponseEntity<List<Category>> getCategories() {
         return ResponseEntity.ok(categoryService.getCategories());
     }
 
     @GetMapping("/{categoryId}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable int categoryId) {
+    public ResponseEntity<Category> getCategoryById(@PathVariable Long categoryId) {
         Optional<Category> result = categoryService.getCategoryById(categoryId);
         if (result.isPresent())
             return ResponseEntity.ok(result.get());
@@ -37,16 +38,16 @@ public class CategoriesController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping
-    public ResponseEntity<Object> createCategory(@RequestBody CategoryRequest categoryRequest)
-            throws CategoryDuplicateException {
-        Category result = categoryService.createCategory(
-                categoryRequest.getId(),
-                categoryRequest.getName(),
-                categoryRequest.getDescription()
-        );
-        return ResponseEntity.created(URI.create("/categories/" + result.getId())).body(result);
-    }
+//    @PostMapping
+//    public ResponseEntity<Object> createCategory(@RequestBody CategoryRequest categoryRequest)
+//            throws CategoryDuplicateException {
+//        Category result = categoryService.createCategory(
+//                categoryRequest.getId(),
+//                categoryRequest.getName(),
+//                categoryRequest.getDescription()
+//        );
+//        return ResponseEntity.created(URI.create("/categories/" + result.getId())).body(result);
+//    }
 
 }
 
