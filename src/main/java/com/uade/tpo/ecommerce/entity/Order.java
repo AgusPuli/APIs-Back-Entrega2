@@ -5,13 +5,14 @@ import lombok.Data;
 
 @Entity
 @Data
-//@Table(name: "Orders") -> cambia el nombre de la tabla de sql
+@Table(name = "orders")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private long count;
+    @Column(name = "items_count", nullable = false)
+    private Long itemsCount;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

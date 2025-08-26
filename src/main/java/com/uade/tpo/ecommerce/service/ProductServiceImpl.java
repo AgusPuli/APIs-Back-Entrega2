@@ -40,7 +40,6 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Category inexistente id=" + request.getCategoryId()));
 
-        // ✅ usar builder correctamente
         Product p = Product.builder()
                 .name(name)
                 .description(safe(request.getDescription()))

@@ -13,9 +13,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-//@Table(name = "users", uniqueConstraints = {
-//        @UniqueConstraint(name = "uk_users_email", columnNames = "email")
-//})
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_users_email", columnNames = "email")
+})
 
 public class User {
 
