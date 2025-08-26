@@ -8,16 +8,16 @@ import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 
 public interface UserService {
-    User create(UserRequest request);
+    public User create(UserRequest request);
 
-    User getUserById(Long id);
+    public User getUserById(Long id);
 
-    Page<User> listUsers(Pageable pageable);
+    public Page<User> listUsers(Pageable pageable);
 
-    User update(Long id, UserRequest request);
+    public User update(Long id, UserRequest request);
 
-    void delete(Long id);
+    public void delete(Long id);
 
-    Optional<User> findByEmail(String email);
+    public Optional<User> findByEmail(String email);
 
 }

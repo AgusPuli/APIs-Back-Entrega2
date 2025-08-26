@@ -1,4 +1,6 @@
 package com.uade.tpo.ecommerce.repository;
 
-public class PaymentRepository {
-}
+import com.uade.tpo.ecommerce.entity.Payment;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface PaymentRepository extends JpaRepository<Payment, Long> { }
