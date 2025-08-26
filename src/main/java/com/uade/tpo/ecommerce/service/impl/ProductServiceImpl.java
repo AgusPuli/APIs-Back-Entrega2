@@ -1,4 +1,4 @@
-package com.uade.tpo.ecommerce.service;
+package com.uade.tpo.ecommerce.service.impl;
 
 import com.uade.tpo.ecommerce.entity.Category;
 import com.uade.tpo.ecommerce.entity.Product;
@@ -6,7 +6,9 @@ import com.uade.tpo.ecommerce.entity.dto.ProductRequest;
 import com.uade.tpo.ecommerce.exceptions.ProductDuplicateException;
 import com.uade.tpo.ecommerce.exceptions.ProductNotFoundException;
 import com.uade.tpo.ecommerce.repository.CategoryRepository;
-import com.uade.tpo.ecommerce.repository.ProductRepository;import org.springframework.beans.factory.annotation.Autowired;
+import com.uade.tpo.ecommerce.repository.ProductRepository;
+import com.uade.tpo.ecommerce.service.ProductService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

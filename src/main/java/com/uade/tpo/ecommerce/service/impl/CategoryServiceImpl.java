@@ -1,8 +1,9 @@
-package com.uade.tpo.ecommerce.service;
+package com.uade.tpo.ecommerce.service.impl;
 
 import com.uade.tpo.ecommerce.entity.Category;
 import com.uade.tpo.ecommerce.exceptions.CategoryDuplicateException;
 import com.uade.tpo.ecommerce.repository.CategoryRepository;
+import com.uade.tpo.ecommerce.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;

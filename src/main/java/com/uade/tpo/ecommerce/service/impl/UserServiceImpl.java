@@ -1,10 +1,11 @@
-package com.uade.tpo.ecommerce.service;
+package com.uade.tpo.ecommerce.service.impl;
 
 import com.uade.tpo.ecommerce.entity.dto.UserRequest;
 import com.uade.tpo.ecommerce.entity.User;
 import com.uade.tpo.ecommerce.exceptions.UserEmailAlreadyExistsException;
 import com.uade.tpo.ecommerce.exceptions.UserNotFoundException;
 import com.uade.tpo.ecommerce.repository.UserRepository;
+import com.uade.tpo.ecommerce.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

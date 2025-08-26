@@ -1,9 +1,10 @@
-package com.uade.tpo.ecommerce.service;
+package com.uade.tpo.ecommerce.service.impl;
 
 import com.uade.tpo.ecommerce.entity.*;
 import com.uade.tpo.ecommerce.entity.dto.PaymentRequest;
 import com.uade.tpo.ecommerce.exceptions.OrderNotFoundException;
 import com.uade.tpo.ecommerce.repository.*;
+import com.uade.tpo.ecommerce.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
