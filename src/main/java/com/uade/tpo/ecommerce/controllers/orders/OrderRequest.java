@@ -1,6 +1,5 @@
-package com.uade.tpo.ecommerce.entity.dto;
+package com.uade.tpo.ecommerce.controllers.orders;
 
-import com.uade.tpo.ecommerce.entity.Order;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

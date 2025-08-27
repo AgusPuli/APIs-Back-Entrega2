@@ -1,7 +1,7 @@
 package com.uade.tpo.ecommerce.service.impl;
 
 import com.uade.tpo.ecommerce.entity.*;
-import com.uade.tpo.ecommerce.entity.dto.PaymentRequest;
+import com.uade.tpo.ecommerce.controllers.payments.PaymentRequest;
 import com.uade.tpo.ecommerce.exceptions.OrderNotFoundException;
 import com.uade.tpo.ecommerce.repository.*;
 import com.uade.tpo.ecommerce.service.PaymentService;

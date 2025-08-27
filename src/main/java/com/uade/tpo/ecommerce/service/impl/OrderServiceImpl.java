@@ -1,7 +1,8 @@
 package com.uade.tpo.ecommerce.service.impl;
 
+import com.uade.tpo.ecommerce.controllers.orders.OrderItemRequest;
+import com.uade.tpo.ecommerce.controllers.orders.OrderRequest;
 import com.uade.tpo.ecommerce.entity.*;
-import com.uade.tpo.ecommerce.entity.dto.*;
 import com.uade.tpo.ecommerce.exceptions.*;
 import com.uade.tpo.ecommerce.repository.*;
 import com.uade.tpo.ecommerce.service.OrderService;

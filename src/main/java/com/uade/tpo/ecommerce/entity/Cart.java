@@ -5,14 +5,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
-
 import java.util.List;
 
-
-@Data @Builder @NoArgsConstructor
+@Data
+@Builder
+@NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "carts")
+
 public class Cart{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

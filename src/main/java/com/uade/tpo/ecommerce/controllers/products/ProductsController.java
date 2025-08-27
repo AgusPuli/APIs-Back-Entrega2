@@ -1,7 +1,6 @@
-package com.uade.tpo.ecommerce.controllers;
+package com.uade.tpo.ecommerce.controllers.products;
 
 import com.uade.tpo.ecommerce.entity.Product;
-import com.uade.tpo.ecommerce.entity.dto.ProductRequest;
 import com.uade.tpo.ecommerce.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

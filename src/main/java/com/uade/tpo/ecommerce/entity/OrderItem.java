@@ -3,7 +3,7 @@ package com.uade.tpo.ecommerce.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-
+// Clase que relaciona orden y productos.
 
 @Data
 @Builder
@@ -17,7 +17,7 @@ public class OrderItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "quantity", nullable = false)
+    @Column
     private int quantity;
 
     @Column

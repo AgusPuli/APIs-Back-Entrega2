@@ -1,7 +1,7 @@
 package com.uade.tpo.ecommerce.service;
 import com.uade.tpo.ecommerce.entity.Cart;
-import com.uade.tpo.ecommerce.entity.dto.CartAddRequest;
-import com.uade.tpo.ecommerce.entity.dto.OrderRequest;
+import com.uade.tpo.ecommerce.controllers.carts.CartAddRequest;
+import com.uade.tpo.ecommerce.controllers.orders.OrderRequest;
 
 
 public interface CartService {
@@ -14,5 +14,5 @@ public interface CartService {
     public Cart clear(Long userId);
 
     // Convierte el carrito en orden
-    OrderRequest checkoutPreview(Long userId);
+    public OrderRequest checkoutPreview(Long userId);
 }

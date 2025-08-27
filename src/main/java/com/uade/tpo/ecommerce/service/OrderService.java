@@ -2,7 +2,7 @@ package com.uade.tpo.ecommerce.service;
 
 import com.uade.tpo.ecommerce.entity.Order;
 import com.uade.tpo.ecommerce.entity.OrderStatus;
-import com.uade.tpo.ecommerce.entity.dto.OrderRequest;
+import com.uade.tpo.ecommerce.controllers.orders.OrderRequest;
 import org.springframework.data.domain.*;
 
 public interface OrderService {

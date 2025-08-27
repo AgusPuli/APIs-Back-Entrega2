@@ -6,6 +6,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
+// Clase que relaciona carrito y productos.
+
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -13,6 +17,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "cart_items")
 public class CartItem {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

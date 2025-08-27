@@ -1,8 +1,7 @@
-package com.uade.tpo.ecommerce.controllers;
+package com.uade.tpo.ecommerce.controllers.orders;
 
 import com.uade.tpo.ecommerce.entity.Order;
 import com.uade.tpo.ecommerce.entity.OrderStatus;
-import com.uade.tpo.ecommerce.entity.dto.OrderRequest;
 import com.uade.tpo.ecommerce.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;

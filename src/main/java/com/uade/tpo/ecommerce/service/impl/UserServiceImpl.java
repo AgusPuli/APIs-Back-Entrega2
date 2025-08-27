@@ -1,6 +1,6 @@
 package com.uade.tpo.ecommerce.service.impl;
 
-import com.uade.tpo.ecommerce.entity.dto.UserRequest;
+import com.uade.tpo.ecommerce.controllers.users.UserRequest;
 import com.uade.tpo.ecommerce.entity.User;
 import com.uade.tpo.ecommerce.exceptions.UserEmailAlreadyExistsException;
 import com.uade.tpo.ecommerce.exceptions.UserNotFoundException;

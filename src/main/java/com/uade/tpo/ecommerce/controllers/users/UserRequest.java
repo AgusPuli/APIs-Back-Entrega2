@@ -1,6 +1,5 @@
-package com.uade.tpo.ecommerce.entity.dto;
+package com.uade.tpo.ecommerce.controllers.users;
 
-import lombok.Builder;
 import lombok.Data;
 
 @Data

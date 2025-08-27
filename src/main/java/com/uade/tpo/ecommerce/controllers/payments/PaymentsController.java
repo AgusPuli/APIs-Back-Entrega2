@@ -1,7 +1,6 @@
-package com.uade.tpo.ecommerce.controllers;
+package com.uade.tpo.ecommerce.controllers.payments;
 
 import com.uade.tpo.ecommerce.entity.Payment;
-import com.uade.tpo.ecommerce.entity.dto.PaymentRequest;
 import com.uade.tpo.ecommerce.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

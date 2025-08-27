@@ -39,8 +39,8 @@ public class Order {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    // una orden un pago, no hay multiples pagos para una orden!
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private Payment payment;
-
 
 }

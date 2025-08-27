@@ -2,7 +2,7 @@ package com.uade.tpo.ecommerce.service.impl;
 
 import com.uade.tpo.ecommerce.entity.Category;
 import com.uade.tpo.ecommerce.entity.Product;
-import com.uade.tpo.ecommerce.entity.dto.ProductRequest;
+import com.uade.tpo.ecommerce.controllers.products.ProductRequest;
 import com.uade.tpo.ecommerce.exceptions.ProductDuplicateException;
 import com.uade.tpo.ecommerce.exceptions.ProductNotFoundException;
 import com.uade.tpo.ecommerce.repository.CategoryRepository;

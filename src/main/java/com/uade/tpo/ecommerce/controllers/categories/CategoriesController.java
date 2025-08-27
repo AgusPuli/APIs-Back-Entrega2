@@ -1,7 +1,6 @@
-package com.uade.tpo.ecommerce.controllers;
+package com.uade.tpo.ecommerce.controllers.categories;
 import com.uade.tpo.ecommerce.entity.Category;
 import com.uade.tpo.ecommerce.exceptions.CategoryDuplicateException;
-import com.uade.tpo.ecommerce.entity.dto.CategoryRequest;
 import com.uade.tpo.ecommerce.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;

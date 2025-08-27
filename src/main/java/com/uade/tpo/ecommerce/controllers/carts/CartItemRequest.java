@@ -1,4 +1,4 @@
-package com.uade.tpo.ecommerce.entity.dto;
+package com.uade.tpo.ecommerce.controllers.carts;
 
 import lombok.*;
 

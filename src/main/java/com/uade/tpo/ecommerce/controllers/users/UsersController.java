@@ -1,6 +1,5 @@
-package com.uade.tpo.ecommerce.controllers;
+package com.uade.tpo.ecommerce.controllers.users;
 
-import com.uade.tpo.ecommerce.entity.dto.UserRequest;
 import com.uade.tpo.ecommerce.entity.User;
 import com.uade.tpo.ecommerce.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
