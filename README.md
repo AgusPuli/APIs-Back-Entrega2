@@ -1,5 +1,6 @@
 # E-Commerce API (Spring Boot + JPA)
 Integrantes: Castillo Nahuel, Igarzabal Valentin, Insaurralde Ciro, Mauro Julian, Pulido Agustin
+
 Este proyecto es una API REST para un e-commerce simple.  
 Está desarrollado en **Java 21**, **Spring Boot**, **Spring Data JPA**, **Hibernate** y **MySQL**.
 
