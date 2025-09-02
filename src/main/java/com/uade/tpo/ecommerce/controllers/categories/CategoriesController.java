@@ -1,24 +1,20 @@
 package com.uade.tpo.ecommerce.controllers.categories;
+
 import com.uade.tpo.ecommerce.entity.Category;
 import com.uade.tpo.ecommerce.exceptions.CategoryDuplicateException;
 import com.uade.tpo.ecommerce.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("categories")
 public class CategoriesController {
 
-    @Autowired // genera un contenedor beans, inyecta las dependencias
+    @Autowired
     private CategoryService categoryService;
 
     @GetMapping
@@ -32,17 +28,16 @@ public class CategoriesController {
         if (result.isPresent())
             return ResponseEntity.ok(result.get());
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build(); // lo dejo como lo tenías
     }
 
     @PostMapping
     public ResponseEntity<Object> createCategory(@RequestBody CategoryRequest categoryRequest)
             throws CategoryDuplicateException {
-        Category result = categoryService.createCategory(
-                categoryRequest.getDescription()
-        );
+
+        // CAMBIO MINIMO: ahora paso el DTO completo (name + description)
+        Category result = categoryService.createCategory(categoryRequest);
+
         return ResponseEntity.created(URI.create("/categories/" + result.getId())).body(result);
     }
-
 }
-

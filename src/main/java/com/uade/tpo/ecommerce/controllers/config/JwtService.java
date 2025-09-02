@@ -10,6 +10,7 @@ import java.util.function.Function;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
@@ -77,4 +78,11 @@ public class JwtService {
         SecretKey secretKeySpec = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
         return secretKeySpec;
     }
+
+    // para chequeo
+    @PostConstruct
+    void logKeyLen() {
+        System.out.println("[JWT] secret length (chars): " + secretKey.length());
+    }
+
 }
