@@ -36,25 +36,24 @@ public class SecurityConfig {
                         })
                 )
                 .authorizeHttpRequests(req -> req
-                        // === Público (auth & error & preflight) ===
+                        // Público
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/error/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // === Público (lectura de catálogo) ===
+                        // Público (lectura)
                         .requestMatchers(HttpMethod.GET, "/products/**", "/categories/**").permitAll()
 
-                        // === USER (carrito, pedidos, pagos) ===
-                        .requestMatchers("/cart/**", "/orders/**", "/payments/**").hasAuthority("USER")
-                        // Si querés que ADMIN también pueda:
-                        // .requestMatchers("/cart/**", "/orders/**", "/payments/**").hasAnyAuthority("USER","ADMIN")
+                        // USER (carrito, pedidos, pagos)
+                        .requestMatchers("/cart/**", "/orders/**", "/payments/**").hasAnyRole("USER", "ADMIN")
+                        // si querés limitar a USER puro, dejá: .hasRole("USER")
 
-                        // === ADMIN (gestión de catálogo) ===
-                        .requestMatchers(HttpMethod.POST,   "/products/**", "/categories/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PUT,    "/products/**", "/categories/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/products/**", "/categories/**").hasAuthority("ADMIN")
+                        // ADMIN (gestión catálogo)
+                        .requestMatchers(HttpMethod.POST,   "/products/**", "/categories/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,    "/products/**", "/categories/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/products/**", "/categories/**").hasRole("ADMIN")
 
-                        // Resto: autenticado
+                        // resto autenticado
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sm -> sm.sessionCreationPolicy(STATELESS))

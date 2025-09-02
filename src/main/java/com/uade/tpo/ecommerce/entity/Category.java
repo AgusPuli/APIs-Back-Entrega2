@@ -6,18 +6,19 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "categories")
-
+@Table(name = "categories", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "name")
+})
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
-    private String description;
-
-    @Column(nullable = false, unique = true) // opcional: unique para que no se repitan
+    @Column(nullable = false, unique = true)
     private String name;
+
+    @Column(nullable = false)
+    private String description;
 
     public Category() {}
 

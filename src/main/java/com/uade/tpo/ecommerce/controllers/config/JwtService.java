@@ -10,6 +10,7 @@ import java.util.function.Function;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
@@ -30,27 +31,33 @@ public class JwtService {
     @Value("${application.security.jwt.expiration}")
     private long jwtExpiration;
 
-    public String generateToken(
-            UserDetails userDetails) {
-        return buildToken(userDetails, jwtExpiration);
+    public String generateTokenFromUsername(
+            String username) {
+        return buildToken(username, jwtExpiration);
     }
 
     private String buildToken(
-            UserDetails userDetails,
+            String username,
             long expiration) {
         return Jwts
                 .builder()
-                .subject(userDetails.getUsername())
+                .subject(username) // usa de subject el email
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSecretKey())
                 .compact();
     }
 
+    // como extractAllClaims() ya valida la firma, solo hay que verificar que no este expirado
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractClaim(token, Claims::getSubject);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+        try {
+            final String username = extractUsername(token); // ya exige firma válida
+            return username != null && !isTokenExpired(token);
+        } catch (JwtException ex) {
+            return false;
+        }
     }
+
 
     private boolean isTokenExpired(String token) {
         return extractClaim(token, Claims::getExpiration).before(new Date());
@@ -65,6 +72,8 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
+
+    // Valida la firma del token, si es invalida lanza excepcion
     private Claims extractAllClaims(String token) {
         return Jwts
                 .parser()

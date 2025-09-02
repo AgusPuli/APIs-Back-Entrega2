@@ -25,18 +25,31 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Transactional(rollbackFor = Throwable.class)
-    public Category createCategory(CategoryRequest request) throws CategoryDuplicateException {
+    @Override
+    public Category createCategory(CategoryRequest req) throws CategoryDuplicateException {
+        String name = req.getName() == null ? null : req.getName().trim();
+        String description = req.getDescription() == null ? null : req.getDescription().trim();
 
-        List<Category> categories = categoryRepository.findByDescription(request.getDescription());
-        if (categories.isEmpty()) {
-            categoryRepository.save(new Category(request.getName(), request.getDescription()));
+        if (name == null || name.isEmpty())
+            throw new IllegalArgumentException("El nombre es obligatorio");
 
-//        Category entity = Category.builder()
-//                .name(request.getName())
-//                .description(request.getDescription())
-//                .build();
+        if (description == null || description.isEmpty())
+            throw new IllegalArgumentException("La descripción es obligatoria");
+
+        // validacion x nombre
+        if (categoryRepository.existsByNameIgnoreCase(name)) {
+            throw new CategoryDuplicateException();
         }
-        throw new CategoryDuplicateException();
+
+        Category cat = new Category();
+        cat.setName(name);
+        cat.setDescription(description);
+        try {
+            return categoryRepository.save(cat);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            // por si la carrera llega a la DB primero
+            throw new CategoryDuplicateException();
+        }
     }
 
 }

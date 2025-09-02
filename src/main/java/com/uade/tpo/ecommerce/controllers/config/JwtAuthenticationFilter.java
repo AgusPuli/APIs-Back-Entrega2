@@ -41,34 +41,55 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 2) Tomar header Authorization
-        final String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) { // OJO: con espacio
+        // 2) Tomar header Authorization con logs
+        final String rawAuth = request.getHeader("Authorization");
+        if (rawAuth == null) {
+            System.out.println("[JWT] Authorization header: <null>");
+            filterChain.doFilter(request, response);
+            return;
+        }
+        System.out.println("[JWT] Authorization header: " + rawAuth);
+
+        // tolerante a mayúsc/minúsc y espacios
+        final String lower = rawAuth.toLowerCase().trim();
+        if (!lower.startsWith("bearer ")) {
+            System.out.println("[JWT] Header NO empieza con 'Bearer ' (insensible a mayúsc).");
             filterChain.doFilter(request, response);
             return;
         }
 
-        final String jwt = authHeader.substring(7);
+        // cortar el prefijo y limpiar
+        final String jwt = rawAuth.substring(rawAuth.indexOf(' ') + 1).trim();
+        if (jwt.isEmpty()) {
+            System.out.println("[JWT] Token vacío luego de 'Bearer '.");
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         try {
-            // 3) Extraer username del JWT
+            // 3) Extraer subject (email) del JWT
             final String userEmail = jwtService.extractUsername(jwt);
+            System.out.println("[DBG] token.sub = " + userEmail);
+            System.out.println("[DBG] token.exp = " + jwtService.extractClaim(jwt, io.jsonwebtoken.Claims::getExpiration));
 
             // 4) Si no hay auth en contexto, validamos el token y seteamos SecurityContext
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
+                // cargar detalles del usuario
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                System.out.println("[DBG] userDetails.getUsername() = " + userDetails.getUsername());
+                System.out.println("[AUTH] " + userEmail + " -> " + userDetails.getAuthorities());
 
                 if (jwtService.isTokenValid(jwt, userDetails)) {
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities() // acá vienen "USER"/"ADMIN" o "ROLE_*" según tu elección
-                    );
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 } else {
-                    // token con firma inválida, etc.
                     unauthorized(response, "invalid_token", "Token inválido.");
                     return;
                 }
@@ -77,11 +98,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         } catch (ExpiredJwtException ex) {
-            // 5) Token vencido → 401 prolijo
             SecurityContextHolder.clearContext();
             unauthorized(response, "token_expired", "Tu sesión venció. Volvé a iniciar sesión.");
         } catch (JwtException ex) {
-            // 6) Cualquier problema de JWT → 401
             SecurityContextHolder.clearContext();
             unauthorized(response, "invalid_token", "Token inválido.");
         }

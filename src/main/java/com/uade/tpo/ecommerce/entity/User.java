@@ -49,13 +49,15 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(this.role.name())); // "USER" o "ADMIN"
+        return List.of(new SimpleGrantedAuthority("ROLE_" + this.role.name())); // Opción B
+        // return List.of(new SimpleGrantedAuthority(this.role.name()));        // Opción A
     }
 
     @Override
     public String getUsername() {
-        return "";
+        return this.email;
     }
+
 
     @Override
     public boolean isAccountNonExpired() {
