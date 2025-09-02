@@ -25,10 +25,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // CORS opcional: .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint((req, res, ex) -> {
+
                             // 401 prolijo cuando no hay token o está vencido
                             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             res.setContentType("application/json");
@@ -36,6 +36,7 @@ public class SecurityConfig {
                         })
                 )
                 .authorizeHttpRequests(req -> req
+
                         // Público
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/error/**").permitAll()
@@ -46,7 +47,7 @@ public class SecurityConfig {
 
                         // USER (carrito, pedidos, pagos)
                         .requestMatchers("/cart/**", "/orders/**", "/payments/**").hasAnyRole("USER", "ADMIN")
-                        // si querés limitar a USER puro, dejá: .hasRole("USER")
+
 
                         // ADMIN (gestión catálogo)
                         .requestMatchers(HttpMethod.POST,   "/products/**", "/categories/**").hasRole("ADMIN")
