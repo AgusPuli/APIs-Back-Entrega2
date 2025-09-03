@@ -1,10 +1,9 @@
 package com.uade.tpo.ecommerce.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.util.List;
 
 @Data
@@ -25,5 +24,7 @@ public class Cart{
 
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("cart-items")
+    @ToString.Exclude @EqualsAndHashCode.Exclude
     private List<CartItem> items;
 }

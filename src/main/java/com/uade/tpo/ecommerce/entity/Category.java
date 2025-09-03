@@ -1,5 +1,6 @@
 package com.uade.tpo.ecommerce.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +10,8 @@ import lombok.Data;
 @Table(name = "categories", uniqueConstraints = {
         @UniqueConstraint(columnNames = "name")
 })
+
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // para que no loopee
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

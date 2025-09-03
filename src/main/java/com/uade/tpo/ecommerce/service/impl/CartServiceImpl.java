@@ -61,6 +61,11 @@ public class CartServiceImpl implements CartService {
             throw new IllegalArgumentException("quantity inválida (debe ser > 0)");
         }
 
+        for (Product p : products.findAll()) {
+            if (p.getStock() == 0){
+                throw new IllegalArgumentException("No hay mas stock disponible");
+            }
+        }
         Product product = products.findById(ir.getProductId())
                 .orElseThrow(() -> new ProductNotFoundException(ir.getProductId()));
 

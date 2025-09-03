@@ -1,5 +1,8 @@
 package com.uade.tpo.ecommerce.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,14 +41,17 @@ public class Order {
 //    private Long itemsCount;
     @Builder.Default
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("order-items")
     private List<OrderItem> items = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
     // una orden un pago, no hay multiples pagos para una orden!
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("order-payment")
     private Payment payment;
 
 }

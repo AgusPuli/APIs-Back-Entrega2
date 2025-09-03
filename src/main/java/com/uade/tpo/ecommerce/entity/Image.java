@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Blob;
-
 
 @Data
 @Entity
@@ -16,10 +14,19 @@ import java.sql.Blob;
 @NoArgsConstructor
 @Table(name = "image_table")
 public class Image {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
-    private Blob image;
+    // ⚠chadGTP recomendacion: Mejor usar byte[] con @Lob en vez de java.sql.Blob
+    @Lob
+    @Column(name = "image", columnDefinition = "LONGBLOB", nullable = false)
+    private byte[] image;
+
+    @OneToOne
+    @JoinColumn(name = "product_id", unique = true, nullable = false)
+    private Product product;
 }
+
 

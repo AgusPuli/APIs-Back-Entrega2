@@ -1,5 +1,8 @@
 package com.uade.tpo.ecommerce.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,8 +31,9 @@ public class OrderItem {
     @Column(nullable = false)
     private double subtotal;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "order_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    @JsonBackReference("order-items") // para que no entre en loop
     private Order order;
 
     @ManyToOne

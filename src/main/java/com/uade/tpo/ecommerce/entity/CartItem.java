@@ -1,10 +1,8 @@
 package com.uade.tpo.ecommerce.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 
 // Clase que relaciona carrito y productos.
@@ -24,6 +22,8 @@ public class CartItem {
 
     @ManyToOne
     @JoinColumn(name = "cart_id", nullable = false)
+    @JsonBackReference("cart-items")
+    @ToString.Exclude @EqualsAndHashCode.Exclude
     private Cart cart;
 
     @ManyToOne(fetch = FetchType.LAZY)
