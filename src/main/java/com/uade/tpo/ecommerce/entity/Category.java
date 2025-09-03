@@ -17,15 +17,16 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING) // guarda el nombre del enum (APPLE, SAMSUNG, etc.)
     @Column(nullable = false, unique = true)
-    private String name;
+    private CategoryType name;
 
     @Column(nullable = false)
     private String description;
 
     public Category() {}
 
-    public Category(String name, String description) {
+    public Category(CategoryType name, String description) {
         this.name = name;
         this.description = description;
     }

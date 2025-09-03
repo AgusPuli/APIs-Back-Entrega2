@@ -1,5 +1,6 @@
 package com.uade.tpo.ecommerce.controllers.products;
 
+import com.uade.tpo.ecommerce.entity.CategoryType;
 import lombok.Data;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -14,5 +15,5 @@ public class ProductRequest {
     private String description;
     private Double price;
     private Integer stock;
-    private Long categoryId; // FK a Category
+    private CategoryType category;
 }

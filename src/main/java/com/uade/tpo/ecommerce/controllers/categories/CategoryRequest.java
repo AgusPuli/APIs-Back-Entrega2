@@ -1,18 +1,19 @@
 package com.uade.tpo.ecommerce.controllers.categories;
 
+import com.uade.tpo.ecommerce.entity.CategoryType;
 import lombok.Data;
 
 @Data
 public class CategoryRequest {
 
-    private String name;
+    private CategoryType name;
     private String description;
 
-    public String getName() {
+    public CategoryType getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(CategoryType name) {
         this.name = name;
     }
 
@@ -24,7 +25,7 @@ public class CategoryRequest {
         this.description = description;
     }
 
-    public CategoryRequest(String name, String description) {
+    public CategoryRequest(CategoryType name, String description) {
         this.name = name;
         this.description = description;
     }

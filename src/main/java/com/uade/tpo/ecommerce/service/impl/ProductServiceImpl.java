@@ -1,10 +1,9 @@
 package com.uade.tpo.ecommerce.service.impl;
 
-import com.uade.tpo.ecommerce.entity.Category;
-import com.uade.tpo.ecommerce.entity.Product;
 import com.uade.tpo.ecommerce.controllers.products.ProductRequest;
-import com.uade.tpo.ecommerce.exceptions.ProductDuplicateException;
-import com.uade.tpo.ecommerce.exceptions.ProductNotFoundException;
+import com.uade.tpo.ecommerce.entity.Category;
+import com.uade.tpo.ecommerce.entity.CategoryType;
+import com.uade.tpo.ecommerce.entity.Product;
 import com.uade.tpo.ecommerce.repository.CategoryRepository;
 import com.uade.tpo.ecommerce.repository.ProductRepository;
 import com.uade.tpo.ecommerce.service.ProductService;
@@ -12,99 +11,76 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
-@Transactional
 public class ProductServiceImpl implements ProductService {
 
     @Autowired
-    private ProductRepository products;
+    private ProductRepository productRepository;
 
     @Autowired
-    private CategoryRepository categories;
+    private CategoryRepository categoryRepository;
 
     @Override
     public Product create(ProductRequest request) {
-        String name = safe(request.getName());
-
-        // Duplicado por nombre (opcional)
-        if (name != null && products.existsByNameIgnoreCase(name)) {
-            throw new ProductDuplicateException(name);
-        }
-
-        if (request.getCategoryId() == null) {
-            // si tu @JoinColumn es nullable = false, la categoría es obligatoria
-            throw new IllegalArgumentException("CategoryId es requerido");
-        }
-
-        Category category = categories.findById(request.getCategoryId())
+        Category category = categoryRepository.findByName(request.getCategory())
                 .orElseThrow(() -> new IllegalArgumentException(
-                        "Category inexistente id=" + request.getCategoryId()));
+                        "Categoría no encontrada: " + request.getCategory()
+                ));
 
-        Product p = Product.builder()
-                .name(name)
-                .description(safe(request.getDescription()))
+        Product product = Product.builder()
+                .name(request.getName())
+                .description(request.getDescription())
                 .price(request.getPrice())
                 .stock(request.getStock())
-                .category(category)  // ya que es obligatorio
+                .category(category)
                 .build();
 
-        return products.save(p);
+        return productRepository.save(product);
     }
 
-
     @Override
-    @Transactional(readOnly = true)
     public Product getProductById(Long id) {
-        return products.findById(id).orElseThrow(() -> new ProductNotFoundException(id));
+        return productRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con id: " + id));
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<Product> listProducts(Pageable pageable) {
-        return products.findAll(pageable);
+        return productRepository.findAll(pageable);
     }
 
     @Override
     public Product update(Long id, ProductRequest request) {
-        Product p = products.findById(id).orElseThrow(() -> new ProductNotFoundException(id));
+        Product existing = productRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con id: " + id));
 
-        String newName = safe(request.getName());
-        if (newName != null && !newName.equalsIgnoreCase(p.getName())
-                && products.existsByNameIgnoreCase(newName)) {
-            throw new ProductDuplicateException(newName);
-        }
+        Category category = categoryRepository.findByName(request.getCategory())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Categoría no encontrada: " + request.getCategory()
+                ));
 
-        p.setName(newName != null ? newName : p.getName());
-        p.setDescription(safeOr(p.getDescription(), request.getDescription()));
-        if (request.getPrice() != null) p.setPrice(request.getPrice());
-        if (request.getStock() != null) p.setStock(request.getStock());
+        existing.setName(request.getName());
+        existing.setDescription(request.getDescription());
+        existing.setPrice(request.getPrice());
+        existing.setStock(request.getStock());
+        existing.setCategory(category);
 
-        if (request.getCategoryId() != null) {
-            Category category = categories.findById(request.getCategoryId())
-                    .orElseThrow(() -> new IllegalArgumentException(
-                            "Category inexistente id=" + request.getCategoryId()));
-            p.setCategory(category);
-        }
-
-        return products.save(p);
+        return productRepository.save(existing);
     }
 
     @Override
     public void delete(Long id) {
-        Product p = products.findById(id).orElseThrow(() -> new ProductNotFoundException(id));
-        products.delete(p);
+        if (!productRepository.existsById(id)) {
+            throw new IllegalArgumentException("Producto no encontrado con id: " + id);
+        }
+        productRepository.deleteById(id);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<Product> listByCategory(Long categoryId, Pageable pageable) {
-        return products.findByCategoryId(categoryId, pageable);
-    }
-
-    private String safe(String s) { return s == null ? null : s.trim(); }
-    private String safeOr(String current, String incoming) {
-        return incoming == null ? current : safe(incoming);
+    public List<Product> findByCategory(CategoryType categoryType) {
+        return productRepository.findByCategory_Name(categoryType);
     }
 }

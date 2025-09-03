@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import com.uade.tpo.ecommerce.entity.CategoryType;
+import java.util.List;
 
 @RestController
 @RequestMapping("/products")
@@ -42,8 +44,8 @@ public class ProductsController {
         service.delete(id);
     }
 
-    @GetMapping("/by-category/{categoryId}")
-    public Page<Product> byCategory(@PathVariable Long categoryId, Pageable pageable) {
-        return service.listByCategory(categoryId, pageable);
+    @GetMapping("/category/{category}")
+    public List<Product> getProductsByCategory(@PathVariable CategoryType category) {
+        return service.findByCategory(category);
     }
 }

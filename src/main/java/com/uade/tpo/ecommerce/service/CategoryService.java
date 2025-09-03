@@ -3,7 +3,6 @@ package com.uade.tpo.ecommerce.service;
 import com.uade.tpo.ecommerce.controllers.categories.CategoryRequest;
 import com.uade.tpo.ecommerce.entity.Category;
 import com.uade.tpo.ecommerce.exceptions.CategoryDuplicateException;
-
 import java.util.List;
 import java.util.Optional;
 
