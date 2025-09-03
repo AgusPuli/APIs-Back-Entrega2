@@ -17,16 +17,18 @@ public class OrderItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private int quantity;
 
-    @Column
+    //@Positive
+    @Column(nullable = false)
     private double unitPrice;
 
-    @Column
+    //@PositiveOrZero
+    @Column(nullable = false)
     private double subtotal;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 

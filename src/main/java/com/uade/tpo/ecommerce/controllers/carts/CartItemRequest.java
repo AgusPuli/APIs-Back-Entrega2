@@ -10,3 +10,10 @@ public class CartItemRequest {
     private Long productId;
     private Integer quantity;
 }
+
+// EN JSON
+//
+// {
+// "userId": 4
+// "item":{"productId": "", "quantity":5}
+//}

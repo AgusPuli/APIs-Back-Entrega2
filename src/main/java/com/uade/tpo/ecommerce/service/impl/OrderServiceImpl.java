@@ -22,6 +22,7 @@ public class OrderServiceImpl implements OrderService {
     @Autowired private UserRepository users;
     @Autowired private ProductRepository products;
 
+    @Transactional
     @Override
     public Order create(OrderRequest request) {
         if (request.getUserId() == null || request.getItems() == null || request.getItems().isEmpty()) {
