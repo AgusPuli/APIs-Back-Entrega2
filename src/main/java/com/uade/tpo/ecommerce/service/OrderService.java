@@ -6,7 +6,7 @@ import com.uade.tpo.ecommerce.controllers.orders.OrderRequest;
 import org.springframework.data.domain.*;
 
 public interface OrderService {
-    public Order create(OrderRequest request);
+    public Order createFromCart(Long userId);
 
     public Order getOrderById(Long orderId);
 

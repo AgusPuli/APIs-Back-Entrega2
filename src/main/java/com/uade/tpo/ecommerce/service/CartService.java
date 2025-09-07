@@ -1,18 +1,29 @@
 package com.uade.tpo.ecommerce.service;
-import com.uade.tpo.ecommerce.entity.Cart;
-import com.uade.tpo.ecommerce.controllers.carts.CartAddRequest;
-import com.uade.tpo.ecommerce.controllers.orders.OrderRequest;
 
+import com.uade.tpo.ecommerce.controllers.carts.CartAddRequest;
+import com.uade.tpo.ecommerce.controllers.carts.CartItemRequest;
+import com.uade.tpo.ecommerce.controllers.orders.OrderRequest;
+import com.uade.tpo.ecommerce.entity.Cart;
+
+import java.math.BigDecimal;
 
 public interface CartService {
-    public Cart getByUser(Long userId);
 
-    public Cart addItem(CartAddRequest request);
+    Cart getByUser(Long userId);
 
-    public Cart removeItem(Long userId, Long productId);
+    Cart addItem(CartAddRequest request);
 
-    public Cart clear(Long userId);
+    Cart removeItem(Long userId, Long productId);
 
-    // Convierte el carrito en orden
-    public OrderRequest checkoutPreview(Long userId);
+    Cart clear(Long userId);
+
+    // Previsualización de orden (armada desde el carrito)
+    OrderRequest checkoutPreview(Long userId);
+
+    // === nuevos/clave con userId ===
+    BigDecimal getCurrentCartSubtotal(Long userId);
+
+    void applyDiscount(Long userId, String code, BigDecimal percentage, BigDecimal discountAmount);
+
+    void removeDiscount(Long userId);
 }

@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 // Clase que relaciona orden y productos.
 
 @Data
@@ -23,13 +25,11 @@ public class OrderItem {
     @Column(nullable = false)
     private int quantity;
 
-    //@Positive
-    @Column(nullable = false)
-    private double unitPrice;
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal unitPrice = BigDecimal.ZERO;
 
-    //@PositiveOrZero
-    @Column(nullable = false)
-    private double subtotal;
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal subtotal = BigDecimal.ZERO;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")

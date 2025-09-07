@@ -9,10 +9,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-
 @Entity
 @Data
 @Builder
@@ -20,11 +20,12 @@ import java.util.List;
 @NoArgsConstructor
 @Table(name = "orders")
 public class Order {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Builder.Default // para que el @builder no ignore el instant.now()
+    @Builder.Default
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
@@ -33,12 +34,26 @@ public class Order {
     @Column(nullable = false)
     private OrderStatus status = OrderStatus.PENDING;
 
+    //  subtotal de todos los ítems antes del descuento
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal subtotal = BigDecimal.ZERO;
+
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+
+    // porcentaje de descuento aplicado (ej: 15.0 = 15%)
+    @Column(precision = 5, scale = 2)
+    private BigDecimal discountPercent = BigDecimal.ZERO;
+
+    // código de cupón aplicado
+    @Column
+    private String discountCode;
+
+    // total final a pagar = subtotal - discountAmount
     @Builder.Default
     @Column(nullable = false)
-    private double total = 0.0;
+    private BigDecimal total = BigDecimal.ZERO;
 
-//    @Column(name = "items_count", nullable = false)
-//    private Long itemsCount;
     @Builder.Default
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("order-items")
@@ -49,9 +64,7 @@ public class Order {
     @JsonIgnore
     private User user;
 
-    // una orden un pago, no hay multiples pagos para una orden!
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("order-payment")
     private Payment payment;
-
 }

@@ -1,13 +1,13 @@
 package com.uade.tpo.ecommerce.service.impl;
 
-import com.uade.tpo.ecommerce.entity.Cart;
-import com.uade.tpo.ecommerce.entity.CartItem;
-import com.uade.tpo.ecommerce.entity.Product;
-import com.uade.tpo.ecommerce.entity.User;
 import com.uade.tpo.ecommerce.controllers.carts.CartAddRequest;
 import com.uade.tpo.ecommerce.controllers.carts.CartItemRequest;
 import com.uade.tpo.ecommerce.controllers.orders.OrderItemRequest;
 import com.uade.tpo.ecommerce.controllers.orders.OrderRequest;
+import com.uade.tpo.ecommerce.entity.Cart;
+import com.uade.tpo.ecommerce.entity.CartItem;
+import com.uade.tpo.ecommerce.entity.Product;
+import com.uade.tpo.ecommerce.entity.User;
 import com.uade.tpo.ecommerce.exceptions.ProductNotFoundException;
 import com.uade.tpo.ecommerce.repository.CartRepository;
 import com.uade.tpo.ecommerce.repository.ProductRepository;
@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -63,9 +65,10 @@ public class CartServiceImpl implements CartService {
 
         for (Product p : products.findAll()) {
             if (p.getStock() == 0){
-                throw new IllegalArgumentException("No hay mas stock disponible");
+                throw new IllegalArgumentException("No hay más stock disponible");
             }
         }
+
         Product product = products.findById(ir.getProductId())
                 .orElseThrow(() -> new ProductNotFoundException(ir.getProductId()));
 
@@ -122,6 +125,10 @@ public class CartServiceImpl implements CartService {
 
         Cart cart = getByUser(userId);
         cart.setItems(new ArrayList<>()); // reset lista
+        // limpiar descuento cuando vaciás el carrito
+        cart.setDiscountCode(null);
+        cart.setDiscountPercentage(null);
+
         return carts.save(cart);
     }
 
@@ -148,5 +155,57 @@ public class CartServiceImpl implements CartService {
                 .userId(userId)
                 .items(orderItems)
                 .build();
+    }
+
+    // ===================== Descuentos con userId =====================
+
+    private BigDecimal priceOf(Product p) {
+        // Product.price debe ser BigDecimal
+        return (p != null && p.getPrice() != null) ? p.getPrice() : BigDecimal.ZERO;
+    }
+
+    private BigDecimal computeSubtotal(Cart cart) {
+        BigDecimal subtotal = BigDecimal.ZERO;
+        if (cart.getItems() != null) {
+            for (CartItem ci : cart.getItems()) {
+                Product p = ci.getProduct();
+                int qty = (ci.getQuantity() != null) ? ci.getQuantity() : 0;
+                if (p != null && qty > 0) {
+                    subtotal = subtotal.add(priceOf(p).multiply(BigDecimal.valueOf(qty)));
+                }
+            }
+        }
+        return subtotal.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    @Override
+    public BigDecimal getCurrentCartSubtotal(Long userId) {
+        if (userId == null) throw new IllegalArgumentException("userId es requerido");
+        Cart cart = getByUser(userId);
+        return computeSubtotal(cart);
+    }
+
+    @Override
+    public void applyDiscount(Long userId, String code, BigDecimal percentage, BigDecimal ignored) {
+        if (userId == null) throw new IllegalArgumentException("userId es requerido");
+        if (code == null || code.isBlank()) throw new IllegalArgumentException("code es requerido");
+        if (percentage == null) percentage = BigDecimal.ZERO;
+
+        Cart cart = getByUser(userId);
+
+        // Guardamos solo código y % en el carrito (el monto se recalcula cuando haga checkout)
+        cart.setDiscountCode(code.trim().toUpperCase());
+        cart.setDiscountPercentage(percentage.setScale(2, RoundingMode.HALF_UP));
+
+        carts.save(cart);
+    }
+
+    @Override
+    public void removeDiscount(Long userId) {
+        if (userId == null) throw new IllegalArgumentException("userId es requerido");
+        Cart cart = getByUser(userId);
+        cart.setDiscountCode(null);
+        cart.setDiscountPercentage(null);
+        carts.save(cart);
     }
 }

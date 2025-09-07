@@ -11,6 +11,8 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 @Service
@@ -18,66 +20,70 @@ import java.util.*;
 public class OrderServiceImpl implements OrderService {
 
     @Autowired private OrderRepository orders;
-    @Autowired private OrderItemRepository orderItems;
     @Autowired private UserRepository users;
     @Autowired private ProductRepository products;
+    @Autowired private CartRepository carts;
 
+    // Checkout desde carrito
     @Transactional
-    @Override
-    public Order create(OrderRequest request) {
-        if (request.getUserId() == null || request.getItems() == null || request.getItems().isEmpty()) {
-            throw new IllegalArgumentException("userId e items son requeridos");
+    public Order createFromCart(Long userId) {
+        Cart cart = carts.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("No existe carrito para userId=" + userId));
+
+        if (cart.getItems() == null || cart.getItems().isEmpty()) {
+            throw new IllegalArgumentException("El carrito está vacío");
         }
 
-        User user = users.findById(request.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("Usuario inexistente id=" + request.getUserId()));
-
         Order order = Order.builder()
-                .user(user)
+                .user(cart.getUser())
                 .status(OrderStatus.PENDING)
-                .total(0.0)
                 .build();
 
+        BigDecimal subtotal = BigDecimal.ZERO;
         List<OrderItem> items = new ArrayList<>();
-        double total = 0.0;
 
-        for (OrderItemRequest ir : request.getItems()) {
-            Product product = products.findById(ir.getProductId())
-                    .orElseThrow(() -> new IllegalArgumentException("Producto inexistente id=" + ir.getProductId()));
+        for (CartItem ci : cart.getItems()) {
+            Product product = ci.getProduct();
+            int qty = ci.getQuantity();
 
-            int qty = Optional.ofNullable(ir.getQuantity()).orElse(0);
-            if (qty <= 0) throw new IllegalArgumentException("quantity inválida para productId=" + ir.getProductId());
+            BigDecimal unitPrice = Optional.ofNullable(product.getPrice()).orElse(BigDecimal.ZERO);
+            BigDecimal lineSubtotal = unitPrice.multiply(BigDecimal.valueOf(qty));
 
-            // (Opcional) validar stock
-            if (product.getStock() != null && product.getStock() < qty) {
-                throw new InsufficientStockException(product.getId());
-            }
-
-            double unitPrice = Optional.ofNullable(product.getPrice()).orElse(0.0);
-            double subtotal = unitPrice * qty;
+            subtotal = subtotal.add(lineSubtotal);
 
             OrderItem item = OrderItem.builder()
                     .order(order)
                     .product(product)
                     .quantity(qty)
                     .unitPrice(unitPrice)
-                    .subtotal(subtotal)
+                    .subtotal(lineSubtotal)
                     .build();
 
             items.add(item);
-            total += subtotal;
-
-            // (Opcional) descontar stock:
-            if (product.getStock() != null) {
-                product.setStock(product.getStock() - qty);
-            }
         }
 
-        order.setItems(items);
-        order.setTotal(total);
+        // aplicar descuento del carrito
+        BigDecimal pct = Optional.ofNullable(cart.getDiscountPercentage()).orElse(BigDecimal.ZERO);
+        if (pct.compareTo(BigDecimal.ZERO) < 0) pct = BigDecimal.ZERO;
+        if (pct.compareTo(BigDecimal.valueOf(100)) > 0) pct = BigDecimal.valueOf(100);
 
-        // Persist cascada por items (mappedBy=order + cascade=ALL):
+        BigDecimal discountAmount = subtotal.multiply(pct)
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+
+        BigDecimal total = subtotal.subtract(discountAmount);
+
+        order.setItems(items);
+        order.setSubtotal(subtotal.setScale(2, RoundingMode.HALF_UP));
+        order.setDiscountPercent(pct.setScale(2, RoundingMode.HALF_UP));
+        order.setDiscountCode(cart.getDiscountCode());
+        order.setDiscountAmount(discountAmount.setScale(2, RoundingMode.HALF_UP));
+        order.setTotal(total.setScale(2, RoundingMode.HALF_UP));
+
         Order saved = orders.save(order);
+
+        // limpiar carrito después del checkout
+        carts.delete(cart);
+
         return saved;
     }
 

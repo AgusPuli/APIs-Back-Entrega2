@@ -13,8 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class PaymentServiceImpl implements PaymentService {
 
-    @Autowired private PaymentRepository payments;
-    @Autowired private OrderRepository orders;
+    @Autowired
+    private PaymentRepository payments;
+    @Autowired
+    private OrderRepository orders;
 
     @Override
     public Payment pay(PaymentRequest request) {
@@ -24,13 +26,14 @@ public class PaymentServiceImpl implements PaymentService {
         if (order.getStatus() == OrderStatus.PAID) {
             throw new IllegalStateException("El pedido ya está pagado");
         }
-        if (request.getAmount() == null || request.getAmount() < order.getTotal()) {
+
+        if (request.getAmount() == null || request.getAmount().compareTo(order.getTotal()) < 0) {
             throw new IllegalArgumentException("Monto insuficiente");
         }
 
         Payment payment = Payment.builder()
                 .order(order)
-                .amount(request.getAmount())
+                .amount(request.getAmount().setScale(2)) // opcional, asegurar 2 decimales
                 .method(request.getMethod())
                 .build();
 
