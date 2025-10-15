@@ -1,6 +1,7 @@
 package com.uade.tpo.ecommerce.service.impl;
 
 import com.uade.tpo.ecommerce.controllers.users.UserRequest;
+import com.uade.tpo.ecommerce.entity.Role;
 import com.uade.tpo.ecommerce.entity.User;
 import com.uade.tpo.ecommerce.exceptions.UserEmailAlreadyExistsException;
 import com.uade.tpo.ecommerce.exceptions.UserNotFoundException;
@@ -59,6 +60,22 @@ public class UserServiceImpl implements UserService {
         u.setLastName(safe(request.getLastName()));
         u.setEmail(newEmail);
         u.setPassword(request.getPassword());
+        return users.save(u);
+    }
+
+    @Override
+    public User makeAdmin(Long id, UserRequest request) {
+        User u = users.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+
+        u.setRole(Role.ADMIN);
+        return users.save(u);
+    }
+
+    @Override
+    public User removeAdmin(Long id, UserRequest request) {
+        User u = users.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+
+        u.setRole(Role.USER);
         return users.save(u);
     }
 

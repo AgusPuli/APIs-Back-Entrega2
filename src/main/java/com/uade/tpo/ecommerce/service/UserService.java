@@ -16,6 +16,10 @@ public interface UserService {
 
     public User update(Long id, UserRequest request);
 
+    User makeAdmin(Long id, UserRequest request);
+
+    User removeAdmin(Long id, UserRequest request);
+
     public void delete(Long id);
 
     public Optional<User> findByEmail(String email);

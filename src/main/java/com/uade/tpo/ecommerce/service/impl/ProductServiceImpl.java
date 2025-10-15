@@ -46,10 +46,10 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con id: " + id));
     }
-
+    
     @Override
     public Page<Product> listProducts(Pageable pageable) {
-        return productRepository.findAll(pageable);
+        return productRepository.findByStockGreaterThan(0, pageable); //lista productos con stock > 0
     }
 
     @Override

@@ -50,11 +50,13 @@ public class SecurityConfig {
                         // USER (carrito, pedidos, pagos)
                         .requestMatchers("/cart/**", "/orders/**", "/payments/**").hasAnyRole("USER", "ADMIN")
 
-
                         // ADMIN (gestión catálogo)
                         .requestMatchers(HttpMethod.POST,   "/products/**", "/categories/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT,    "/products/**", "/categories/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/products/**", "/categories/**").hasRole("ADMIN")
+
+                        // ADMIN (gestión usuarios)
+                        .requestMatchers("/users/**").hasAnyRole( "ADMIN")
 
                         // resto autenticado
                         .anyRequest().authenticated()

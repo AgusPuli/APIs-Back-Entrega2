@@ -14,28 +14,30 @@ import java.util.List;
 @RequestMapping("/products")
 public class ProductsController {
 
-    @Autowired
-    private ProductService service;
+    @Autowired private ProductService service;
+    @Autowired private ProductMapper mapper;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Product create(@RequestBody ProductRequest request) {
-        return service.create(request);
+    public ProductResponse create(@RequestBody ProductRequest request) {
+        Product p = service.create(request);
+        return mapper.toResponse(p);
     }
 
     @GetMapping("/{id}")
-    public Product getById(@PathVariable Long id) {
-        return service.getProductById(id);
+    public ProductResponse getById(@PathVariable Long id) {
+        return mapper.toResponse(service.getProductById(id));
     }
 
     @GetMapping
-    public Page<Product> list(Pageable pageable) {
-        return service.listProducts(pageable);
+    public Page<ProductResponse> list(Pageable pageable) {
+        return service.listProducts(pageable).map(mapper::toResponse);
     }
 
     @PutMapping("/{id}")
-    public Product update(@PathVariable Long id, @RequestBody ProductRequest request) {
-        return service.update(id, request);
+    public ProductResponse update(@PathVariable Long id, @RequestBody ProductRequest request) {
+        Product p = service.update(id, request);
+        return mapper.toResponse(p);
     }
 
     @DeleteMapping("/{id}")
@@ -45,7 +47,9 @@ public class ProductsController {
     }
 
     @GetMapping("/category/{category}")
-    public List<Product> getProductsByCategory(@PathVariable CategoryType category) {
-        return service.findByCategory(category);
+    public List<ProductResponse> getProductsByCategory(@PathVariable CategoryType category) {
+        return service.findByCategory(category).stream()
+                .map(mapper::toResponse)
+                .toList();
     }
 }

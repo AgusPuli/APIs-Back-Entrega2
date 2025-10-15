@@ -14,30 +14,28 @@ import org.springframework.http.ResponseEntity;
 @RequestMapping("categories")
 public class CategoriesController {
 
-    @Autowired
-    private CategoryService categoryService;
+    @Autowired private CategoryService categoryService;
+    @Autowired private CategoryMapper mapper;
 
     @GetMapping
-    public ResponseEntity<List<Category>> getCategories() {
-        return ResponseEntity.ok(categoryService.getCategories());
+    public ResponseEntity<List<CategoryResponse>> getCategories() {
+        List<CategoryResponse> body = categoryService.getCategories()
+                .stream().map(mapper::toResponse).toList();
+        return ResponseEntity.ok(body);
     }
 
     @GetMapping("/{categoryId}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable Long categoryId) {
+    public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable Long categoryId) {
         Optional<Category> result = categoryService.getCategoryById(categoryId);
-        if (result.isPresent())
-            return ResponseEntity.ok(result.get());
-
-        return ResponseEntity.noContent().build(); // lo dejo como lo tenías
+        if (result.isEmpty()) return ResponseEntity.notFound().build(); // 404 más claro que 204
+        return ResponseEntity.ok(mapper.toResponse(result.get()));
     }
 
     @PostMapping
-    public ResponseEntity<Object> createCategory(@RequestBody CategoryRequest categoryRequest)
+    public ResponseEntity<CategoryResponse> createCategory(@RequestBody CategoryRequest categoryRequest)
             throws CategoryDuplicateException {
-
-        // CAMBIO MINIMO: ahora paso el DTO completo (name + description)
-        Category result = categoryService.createCategory(categoryRequest);
-
-        return ResponseEntity.created(URI.create("/categories/" + result.getId())).body(result);
+        Category created = categoryService.createCategory(categoryRequest);
+        CategoryResponse body = mapper.toResponse(created);
+        return ResponseEntity.created(URI.create("/categories/" + created.getId())).body(body);
     }
 }

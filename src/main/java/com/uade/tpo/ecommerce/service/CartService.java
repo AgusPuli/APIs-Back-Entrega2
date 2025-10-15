@@ -18,7 +18,7 @@ public interface CartService {
     Cart clear(Long userId);
 
     // Previsualización de orden (armada desde el carrito)
-    OrderRequest checkoutPreview(Long userId);
+    Cart checkoutPreview(Long userId);
 
     // === nuevos/clave con userId ===
     BigDecimal getCurrentCartSubtotal(Long userId);

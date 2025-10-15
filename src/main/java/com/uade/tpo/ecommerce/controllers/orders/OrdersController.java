@@ -19,46 +19,48 @@ public class OrdersController {
 
     @Autowired private OrderService service;
     @Autowired private UserRepository users;
+    @Autowired private OrderMapper mapper;
 
     // ---- helper para sacar userId del token ----
     private Long currentUserId(Authentication auth) {
         if (auth == null || !(auth.getPrincipal() instanceof UserDetails ud)) {
             throw new IllegalArgumentException("No autenticado");
         }
-        String username = ud.getUsername(); // email/username
+        String username = ud.getUsername();
         User u = users.findByEmail(username)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
         return u.getId();
     }
 
-    // ✅ Checkout desde el carrito del usuario autenticado
+    // Checkout desde el carrito del usuario autenticado
     @PostMapping("/checkout")
     @ResponseStatus(HttpStatus.CREATED)
-    public Order checkout(Authentication auth) {
+    public OrderResponses.OrderDetailResponse checkout(Authentication auth) {
         Long userId = currentUserId(auth);
-        return service.createFromCart(userId);
+        Order o = service.createFromCart(userId);
+        return mapper.toDetail(o);
     }
 
     // ---- lecturas y administración ----
 
     @GetMapping("/{id}")
-    public Order get(@PathVariable Long id) {
-        return service.getOrderById(id);
+    public OrderResponses.OrderDetailResponse get(@PathVariable Long id) {
+        return mapper.toDetail(service.getOrderById(id));
     }
 
     @GetMapping
-    public Page<Order> list(Pageable pageable) {
-        return service.listOrders(pageable);
+    public Page<OrderResponses.OrderSummaryResponse> list(Pageable pageable) {
+        return service.listOrders(pageable).map(mapper::toSummary);
     }
 
     @GetMapping("/by-user/{userId}")
-    public Page<Order> byUser(@PathVariable Long userId, Pageable pageable) {
-        return service.listByUser(userId, pageable);
+    public Page<OrderResponses.OrderSummaryResponse> byUser(@PathVariable Long userId, Pageable pageable) {
+        return service.listByUser(userId, pageable).map(mapper::toSummary);
     }
 
     @PutMapping("/{id}/status")
-    public Order setStatus(@PathVariable Long id, @RequestParam OrderStatus status) {
-        return service.updateStatus(id, status);
+    public OrderResponses.OrderSummaryResponse setStatus(@PathVariable Long id, @RequestParam OrderStatus status) {
+        return mapper.toSummary(service.updateStatus(id, status));
     }
 
     @DeleteMapping("/{id}")
