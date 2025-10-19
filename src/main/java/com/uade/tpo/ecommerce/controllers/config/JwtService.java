@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.function.Function;
 import javax.crypto.SecretKey;
+
 import io.jsonwebtoken.JwtException;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
@@ -15,29 +16,39 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 @Service
 public class JwtService {
+
     @Value("${application.security.jwt.secretKey}")
     private String secretKey;
+
     @Value("${application.security.jwt.expiration}")
     private long jwtExpiration;
 
-    public String generateTokenFromUsername(
-            String username) {
-        return buildToken(username, jwtExpiration);
+    // 🔹 Genera token con username y rol
+    public String generateToken(String username, String role) {
+        return buildToken(username, role, jwtExpiration);
     }
 
-    private String buildToken(
-            String username,
-            long expiration) {
-        return Jwts
-                .builder()
-                .subject(username) // usa de subject el email
+    // 🔹 Mantengo compatibilidad con la versión anterior
+    public String generateTokenFromUsername(String username) {
+        return buildToken(username, null, jwtExpiration);
+    }
+
+    private String buildToken(String username, String role, long expiration) {
+        var builder = Jwts.builder()
+                .subject(username) // usa el email como subject
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSecretKey())
-                .compact();
+                .signWith(getSecretKey());
+
+        // ✅ Si se pasó un rol, lo agregamos al payload
+        if (role != null && !role.isEmpty()) {
+            builder.claim("role", role);
+        }
+
+        return builder.compact();
     }
 
-    // como extractAllClaims() ya valida la firma, solo hay que verificar que no este expirado
+    // 🔹 Valida firma y expiración
     public boolean isTokenValid(String token, UserDetails userDetails) {
         try {
             final String username = extractUsername(token); // ya exige firma válida
@@ -47,7 +58,6 @@ public class JwtService {
         }
     }
 
-
     private boolean isTokenExpired(String token) {
         return extractClaim(token, Claims::getExpiration).before(new Date());
     }
@@ -56,13 +66,20 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
+    // 🔹 Nuevo método: obtener el rol directamente
+    public String extractRole(String token) {
+        try {
+            return extractAllClaims(token).get("role", String.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
-
-    // Valida la firma del token, si es invalida lanza excepcion
     private Claims extractAllClaims(String token) {
         return Jwts
                 .parser()
@@ -73,14 +90,11 @@ public class JwtService {
     }
 
     private SecretKey getSecretKey() {
-        SecretKey secretKeySpec = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
-        return secretKeySpec;
+        return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    // para chequeo
     @PostConstruct
     void logKeyLen() {
         System.out.println("[JWT] secret length (chars): " + secretKey.length());
     }
-
 }

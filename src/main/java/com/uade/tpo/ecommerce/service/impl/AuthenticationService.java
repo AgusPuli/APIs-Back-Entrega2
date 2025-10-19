@@ -29,11 +29,14 @@ public class AuthenticationService {
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER) // 👈 siempre USER
+                .role(Role.USER)
                 .build();
 
         repository.save(user);
-        var jwtToken = jwtService.generateTokenFromUsername(user.getEmail());
+
+        // ✅ ahora el token incluye el rol
+        var jwtToken = jwtService.generateToken(user.getEmail(), user.getRole().name());
+
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .build();
@@ -46,11 +49,14 @@ public class AuthenticationService {
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.ADMIN) // 👈 siempre ADMIN
+                .role(Role.ADMIN)
                 .build();
 
         repository.save(user);
-        var jwtToken = jwtService.generateTokenFromUsername(user.getEmail());
+
+        // ✅ token incluye el rol
+        var jwtToken = jwtService.generateToken(user.getEmail(), user.getRole().name());
+
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .build();
@@ -61,13 +67,16 @@ public class AuthenticationService {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
-                        request.getPassword())
+                        request.getPassword()
+                )
         );
 
         var user = repository.findByEmail(request.getEmail())
                 .orElseThrow();
 
-        var jwtToken = jwtService.generateTokenFromUsername(user.getEmail());
+        // ✅ token incluye el rol
+        var jwtToken = jwtService.generateToken(user.getEmail(), user.getRole().name());
+
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .build();
