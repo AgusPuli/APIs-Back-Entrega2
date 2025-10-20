@@ -1,9 +1,11 @@
 package com.uade.tpo.ecommerce.controllers.config;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -60,7 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // cortar el prefijo y limpiar
         final String jwt = rawAuth.substring(rawAuth.indexOf(' ') + 1).trim();
         if (jwt.isEmpty()) {
-            System.out.println("[JWT] Token vacío luego de 'Bearer '.");
+            System.out.println("[JWT] Token vacío luego de 'Bearer '");
             filterChain.doFilter(request, response);
             return;
         }
@@ -77,17 +79,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // cargar detalles del usuario
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
                 System.out.println("[DBG] userDetails.getUsername() = " + userDetails.getUsername());
-                System.out.println("[AUTH] " + userEmail + " -> " + userDetails.getAuthorities());
+
+                // ✅ Extraer el rol directamente del token
+                String role = jwtService.extractRole(jwt);
+                System.out.println("[DBG] token.role = " + role);
+
+                // ✅ Crear autoridad según el rol del token (con prefijo ROLE_)
+                var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
                 if (jwtService.isTokenValid(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
                                     userDetails,
                                     null,
-                                    userDetails.getAuthorities()
+                                    authorities // 👈 usamos las autoridades derivadas del token
                             );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+                    System.out.println("[AUTH] Autenticado como " + role);
                 } else {
                     unauthorized(response, "invalid_token", "Token inválido.");
                     return;
