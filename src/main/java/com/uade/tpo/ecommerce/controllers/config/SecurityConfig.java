@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
@@ -30,8 +31,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint((req, res, ex) -> {
-
-                            // 401 prolijo cuando no hay token o está vencido
+                            // 🔒 Devolver 401 limpio cuando no hay token o está vencido
                             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             res.setContentType("application/json");
                             res.getWriter().write("{\"error\":\"unauthorized\",\"message\":\"Necesitás iniciar sesión.\"}");
@@ -39,26 +39,31 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(req -> req
 
-                        // Público
+                        // 🌍 Público
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/error/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // Público (lectura)
+                        // 📦 Público (lectura)
                         .requestMatchers(HttpMethod.GET, "/products/**", "/categories/**").permitAll()
 
-                        // USER (carrito, pedidos, pagos)
+                        // 🛒 USER (carrito, pedidos, pagos)
                         .requestMatchers("/cart/**", "/orders/**", "/payments/**").hasAnyRole("USER", "ADMIN")
 
-                        // ADMIN (gestión catálogo)
+                        // 🧩 ADMIN (gestión catálogo)
                         .requestMatchers(HttpMethod.POST,   "/products/**", "/categories/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT,    "/products/**", "/categories/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/products/**", "/categories/**").hasRole("ADMIN")
 
-                        // ADMIN (gestión usuarios)
-                        .requestMatchers("/users/**").hasAnyRole( "ADMIN")
+                        // 👤 ADMIN (gestión de usuarios)
+                        .requestMatchers(HttpMethod.POST, "/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
 
-                        // resto autenticado
+                        // 👥 USER o ADMIN pueden leer sus datos personales
+                        .requestMatchers(HttpMethod.GET, "/users/email/**").authenticated()
+
+                        // 🧱 Todo lo demás requiere autenticación
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sm -> sm.sessionCreationPolicy(STATELESS))

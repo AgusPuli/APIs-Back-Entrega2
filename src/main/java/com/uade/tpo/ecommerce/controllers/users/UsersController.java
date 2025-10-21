@@ -48,4 +48,20 @@ public class UsersController {
     public void delete(@PathVariable Long id) {
         service.delete(id);
     }
+
+    // ✅ NUEVO ENDPOINT: Obtener usuario por email
+    @GetMapping("/email/{email}")
+    public ResponseEntity<UserResponseNameDTO> getUserByEmail(@PathVariable String email) {
+        User user = service.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
+
+        UserResponseNameDTO dto = new UserResponseNameDTO(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getRole().name()
+        );
+        return ResponseEntity.ok(dto);
+    }
 }
