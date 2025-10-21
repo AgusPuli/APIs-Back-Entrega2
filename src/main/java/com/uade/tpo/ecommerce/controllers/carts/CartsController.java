@@ -34,6 +34,19 @@ public class CartsController {
         return mapper.toResponse(c);
     }
 
+
+    // 🔹 Disminuir cantidad de un ítem del carrito
+    @PutMapping("/{userId}/item/{productId}/decrease")
+    @PreAuthorize("hasRole('ADMIN') or #userId == authentication.principal.id")
+    public CartResponses.CartResponse decreaseItem(
+            @PathVariable Long userId,
+            @PathVariable Long productId
+    ) {
+        Cart c = service.decreaseItem(userId, productId);
+        return mapper.toResponse(c);
+    }
+
+
     // 🔹 Eliminar ítem del carrito
     @DeleteMapping("/{userId}/item/{productId}")
     @PreAuthorize("hasRole('ADMIN') or #userId == authentication.principal.id")

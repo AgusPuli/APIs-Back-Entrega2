@@ -13,6 +13,9 @@ public interface CartService {
 
     Cart addItem(CartAddRequest request);
 
+    Cart decreaseItem(Long userId, Long productId);
+
+
     Cart removeItem(Long userId, Long productId);
 
     Cart clear(Long userId);

@@ -161,6 +161,36 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    public Cart decreaseItem(Long userId, Long productId) {
+        if (userId == null || productId == null)
+            throw new IllegalArgumentException("userId y productId son requeridos");
+
+        Cart cart = getByUser(userId);
+        List<CartItem> items = (cart.getItems() != null) ? cart.getItems() : new ArrayList<>();
+
+        Iterator<CartItem> it = items.iterator();
+        while (it.hasNext()) {
+            CartItem ci = it.next();
+            if (ci.getProduct() != null && productId.equals(ci.getProduct().getId())) {
+                int nuevaCantidad = ci.getQuantity() - 1;
+
+                if (nuevaCantidad <= 0) {
+                    // 🔸 Si la cantidad llega a 0, se elimina el ítem
+                    it.remove();
+                } else {
+                    // 🔸 Sino, solo se reduce la cantidad
+                    ci.setQuantity(nuevaCantidad);
+                }
+                break;
+            }
+        }
+
+        cart.setItems(items);
+        return carts.save(cart);
+    }
+
+
+    @Override
     public BigDecimal getCurrentCartSubtotal(Long userId) {
         if (userId == null) throw new IllegalArgumentException("userId es requerido");
         Cart cart = getByUser(userId);
