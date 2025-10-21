@@ -48,7 +48,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/products/**", "/categories/**").permitAll()
 
                         // 🛒 USER (carrito, pedidos, pagos)
-                        .requestMatchers("/cart/**", "/orders/**", "/payments/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/cart/**", "/orders/**", "/payments/**").hasAnyRole("ADMIN")
+                        .requestMatchers("/cart/discounts/**","/cart/{userId}/**","/cart/{userId}", "/orders/by-user/{userId}", "/payments/**", "/carts/cart").hasAnyRole("USER")
 
                         // 🧩 ADMIN (gestión catálogo)
                         .requestMatchers(HttpMethod.POST,   "/products/**", "/categories/**").hasRole("ADMIN")
