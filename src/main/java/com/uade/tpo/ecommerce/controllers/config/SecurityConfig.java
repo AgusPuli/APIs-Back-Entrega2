@@ -31,40 +31,39 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint((req, res, ex) -> {
-                            // 🔒 Devolver 401 limpio cuando no hay token o está vencido
+                            // 馃敀 Devolver 401 limpio cuando no hay token o est谩 vencido
                             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             res.setContentType("application/json");
-                            res.getWriter().write("{\"error\":\"unauthorized\",\"message\":\"Necesitás iniciar sesión.\"}");
+                            res.getWriter().write("{\"error\":\"unauthorized\",\"message\":\"Necesit谩s iniciar sesi贸n.\"}");
                         })
                 )
                 .authorizeHttpRequests(req -> req
 
-                        // 🌍 Público
+                        // 馃實 P煤blico
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/error/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // 📦 Público (lectura)
+                        // 馃摝 P煤blico (lectura)
                         .requestMatchers(HttpMethod.GET, "/products/**", "/categories/**").permitAll()
 
-                        // 🛒 USER (carrito, pedidos, pagos)
-                        .requestMatchers("/cart/**", "/orders/**", "/payments/**").hasAnyRole("ADMIN")
-                        .requestMatchers("/cart/discounts/**","/cart/{userId}/**","/cart/{userId}", "/orders/by-user/{userId}", "/payments/**", "/carts/cart").hasAnyRole("USER")
+                        // 馃洅 USER (carrito, pedidos, pagos)
+                        .requestMatchers("/cart/**", "/orders/**", "/payments/**").hasAnyRole("USER", "ADMIN")
 
-                        // 🧩 ADMIN (gestión catálogo)
+                        // 馃З ADMIN (gesti贸n cat谩logo)
                         .requestMatchers(HttpMethod.POST,   "/products/**", "/categories/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT,    "/products/**", "/categories/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/products/**", "/categories/**").hasRole("ADMIN")
 
-                        // 👤 ADMIN (gestión de usuarios)
+                        // 馃懁 ADMIN (gesti贸n de usuarios)
                         .requestMatchers(HttpMethod.POST, "/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
 
-                        // 👥 USER o ADMIN pueden leer sus datos personales
+                        // 馃懃 USER o ADMIN pueden leer sus datos personales
                         .requestMatchers(HttpMethod.GET, "/users/email/**").authenticated()
 
-                        // 🧱 Todo lo demás requiere autenticación
+                        // 馃П Todo lo dem谩s requiere autenticaci贸n
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sm -> sm.sessionCreationPolicy(STATELESS))

@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Transactional
 public class PaymentServiceImpl implements PaymentService {
@@ -33,7 +35,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         Payment payment = Payment.builder()
                 .order(order)
-                .amount(request.getAmount().setScale(2)) // opcional, asegurar 2 decimales
+                .amount(request.getAmount().setScale(2))
                 .method(request.getMethod())
                 .build();
 
@@ -41,5 +43,11 @@ public class PaymentServiceImpl implements PaymentService {
         orders.save(order);
 
         return payments.save(payment);
+    }
+
+    // 🔹 NUEVO: Implementación del método
+    @Override
+    public List<Payment> getPaymentsByUserId(Long userId) {
+        return payments.findByUserId(userId);
     }
 }
