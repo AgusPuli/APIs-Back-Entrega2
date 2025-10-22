@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
@@ -33,6 +35,11 @@ public class Product {
     @Column(nullable = false)
     private Integer stock;
 
+    // ✅ SOFT DELETE: Campo para marcar productos como activos/inactivos
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean active = true;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -41,4 +48,15 @@ public class Product {
     @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Image image;
 
+    // ✅ Relación con CartItems (cascade para eliminar del carrito al desactivar)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties({"product", "cart"})
+    @Builder.Default
+    private List<CartItem> cartItems = new ArrayList<>();
+
+    // ✅ Relación con OrderItems (SIN cascade para preservar historial)
+    @OneToMany(mappedBy = "product")
+    @JsonIgnoreProperties({"product", "order"})
+    @Builder.Default
+    private List<OrderItem> orderItems = new ArrayList<>();
 }

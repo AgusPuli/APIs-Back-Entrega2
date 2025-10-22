@@ -6,9 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.uade.tpo.ecommerce.entity.CategoryType;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/products")
@@ -40,10 +44,11 @@ public class ProductsController {
         return mapper.toResponse(p);
     }
 
+    // ✅ SOFT DELETE: Elimina lógicamente si hay órdenes, físicamente si no
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        service.delete(id);
+    public ResponseEntity<Map<String, Object>> delete(@PathVariable Long id) {
+        Map<String, Object> response = service.deleteProduct(id);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/category/{category}")

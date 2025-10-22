@@ -1,22 +1,26 @@
 package com.uade.tpo.ecommerce.service;
 
-import com.uade.tpo.ecommerce.entity.CategoryType;
-import com.uade.tpo.ecommerce.entity.Product;
 import com.uade.tpo.ecommerce.controllers.products.ProductRequest;
+import com.uade.tpo.ecommerce.entity.Product;
+import com.uade.tpo.ecommerce.entity.CategoryType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ProductService {
-    public Product create(ProductRequest request);
 
-    public Product getProductById(Long id);
+    Product create(ProductRequest request);
 
-    public Page<Product> listProducts(Pageable pageable);
+    Product getProductById(Long id);
 
-    public Product update(Long id, ProductRequest request);
+    Page<Product> listProducts(Pageable pageable);
 
-    public void delete(Long id);
+    Product update(Long id, ProductRequest request);
 
-    public List<Product> findByCategory(CategoryType categoryType);}
+    // ✅ NUEVO: Método para soft delete inteligente
+    Map<String, Object> deleteProduct(Long id);
+
+    List<Product> findByCategory(CategoryType category);
+}
