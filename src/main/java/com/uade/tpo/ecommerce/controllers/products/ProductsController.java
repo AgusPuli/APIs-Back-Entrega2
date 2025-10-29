@@ -44,7 +44,7 @@ public class ProductsController {
         return mapper.toResponse(p);
     }
 
-    // ✅ SOFT DELETE: Elimina lógicamente si hay órdenes, físicamente si no
+    // SOFT DELETE: Elimina lógicamente si hay órdenes, físicamente si no
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Object>> delete(@PathVariable Long id) {
         Map<String, Object> response = service.deleteProduct(id);
@@ -56,5 +56,15 @@ public class ProductsController {
         return service.findByCategory(category).stream()
                 .map(mapper::toResponse)
                 .toList();
+    }
+
+    // Nuevo: toggle de estado activo. Asi producto aparece no disponible y se puede setear como disponible
+    @PatchMapping("/{id}/active")
+    public ProductResponse setActive(
+            @PathVariable Long id,
+            @RequestParam("active") boolean active
+    ) {
+        Product updated = service.setActive(id, active);
+        return mapper.toResponse(updated);
     }
 }

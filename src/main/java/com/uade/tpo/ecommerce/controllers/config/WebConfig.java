@@ -15,7 +15,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "http://localhost:5174",
                         "http://localhost:5175"
                 ) // distintos puertos que usa Vite
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*") // 🔥 permite todos los headers (IMPORTANTE)
                 .allowCredentials(true);
     }

@@ -67,7 +67,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Page<Product> listProducts(Pageable pageable) {
         // Solo productos activos para el catálogo público
-        return repository.findByActiveTrue(pageable);
+        return repository.findAll(pageable);
     }
 
     @Override
@@ -124,5 +124,25 @@ public class ProductServiceImpl implements ProductService {
     public List<Product> findByCategory(CategoryType category) {
         // Solo productos activos de esta categoría
         return repository.findByCategoryNameAndActiveTrue(category);
+    }
+    @Override
+    @Transactional
+    public Product setActive(Long id, boolean active) {
+        Product p = repository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado"));
+
+        // Si tu campo es Boolean en vez de boolean, esto evita NPE
+        boolean current = (p.getActive() instanceof Boolean)
+                ? Boolean.TRUE.equals(p.getActive())
+                : p.getActive(); // si es primitivo boolean
+
+        if (current == active) {
+            // No hay cambios; devolvemos como está
+            return p;
+        }
+
+        p.setActive(active);
+        // Si tu entidad mapea active como 0/1 en DB, el setter boolean->int ya debería estar resuelto por JPA/Hibernate o por tu mapeo.
+        return repository.save(p);
     }
 }

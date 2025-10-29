@@ -16,4 +16,6 @@ public interface ProductService {
     Product update(Long id, ProductRequest request);
     Map<String, Object> deleteProduct(Long id);
     List<Product> findByCategory(CategoryType category);
+    // >>> Nuevo método para el PATCH /products/{id}/active
+    Product setActive(Long id, boolean active);
 }

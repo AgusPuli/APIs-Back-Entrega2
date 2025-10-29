@@ -35,7 +35,7 @@ public class Product {
     @Column(nullable = false)
     private Integer stock;
 
-    // ✅ SOFT DELETE: Campo para marcar productos como activos/inactivos
+    // SOFT DELETE: Campo para marcar productos como activos/inactivos
     @Column(nullable = false)
     @Builder.Default
     private Boolean active = true;
