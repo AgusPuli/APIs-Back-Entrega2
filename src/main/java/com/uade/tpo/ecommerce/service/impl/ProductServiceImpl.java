@@ -1,8 +1,10 @@
 package com.uade.tpo.ecommerce.service;
 
 import com.uade.tpo.ecommerce.controllers.products.ProductRequest;
+import com.uade.tpo.ecommerce.entity.Category;
 import com.uade.tpo.ecommerce.entity.Product;
 import com.uade.tpo.ecommerce.entity.CategoryType;
+import com.uade.tpo.ecommerce.repository.CategoryRepository;
 import com.uade.tpo.ecommerce.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,14 +24,33 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private ProductRepository repository;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
     @Override
     public Product create(ProductRequest request) {
+        // Validar que la categoría sea obligatoria
+        if (request.getCategory() == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "La categoría es obligatoria"
+            );
+        }
+
+        // Buscar la categoría por su nombre (enum)
+        Category category = categoryRepository.findByName(request.getCategory())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Categoría no encontrada: " + request.getCategory()
+                ));
+
         Product product = Product.builder()
                 .name(request.getName())
                 .description(request.getDescription())
                 .price(request.getPrice())
                 .stock(request.getStock())
-                .active(true) // ✅ Por defecto activo
+                .category(category)
+                .active(true)
                 .build();
         return repository.save(product);
     }
@@ -45,13 +66,24 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<Product> listProducts(Pageable pageable) {
-        // ✅ Solo productos activos para el catálogo público
+        // Solo productos activos para el catálogo público
         return repository.findByActiveTrue(pageable);
     }
 
     @Override
     public Product update(Long id, ProductRequest request) {
         Product product = getProductById(id);
+
+        // Actualizar categoría si viene en el request
+        if (request.getCategory() != null) {
+            Category category = categoryRepository.findByName(request.getCategory())
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST,
+                            "Categoría no encontrada: " + request.getCategory()
+                    ));
+            product.setCategory(category);
+        }
+
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
@@ -90,7 +122,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> findByCategory(CategoryType category) {
-        // ✅ Solo productos activos de esta categoría
-        return repository.findByCategoryAndActiveTrue(category);
+        // Solo productos activos de esta categoría
+        return repository.findByCategoryNameAndActiveTrue(category);
     }
 }
