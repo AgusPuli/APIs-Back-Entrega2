@@ -6,20 +6,26 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+// import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity; // Deprecado
+import org.springframework.security.config.Customizer; // Importante para CORS
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.web.cors.CorsConfiguration; // Importante
+import org.springframework.web.cors.CorsConfigurationSource; // Importante
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource; // Importante
+
+import java.util.List;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity // Reemplaza a EnableGlobalMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
@@ -28,42 +34,36 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(Customizer.withDefaults())
+
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint((req, res, ex) -> {
-                            // 馃敀 Devolver 401 limpio cuando no hay token o est谩 vencido
                             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             res.setContentType("application/json");
-                            res.getWriter().write("{\"error\":\"unauthorized\",\"message\":\"Necesit谩s iniciar sesi贸n.\"}");
+                            res.getWriter().write("{\"error\":\"unauthorized\",\"message\":\"Necesitas iniciar sesión.\"}");
                         })
                 )
                 .authorizeHttpRequests(req -> req
+                        // Públicos
+                        .requestMatchers("/auth/**", "/error/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Preflight requests
 
-                        // 馃實 P煤blico
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/error/**").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // 馃摝 P煤blico (lectura)
+                        // Lectura pública de catálogo
                         .requestMatchers(HttpMethod.GET, "/products/**", "/categories/**").permitAll()
 
-                        // 馃洅 USER (carrito, pedidos, pagos)
+                        // Rutas protegidas
                         .requestMatchers("/cart/**", "/orders/**", "/payments/**").hasAnyRole("USER", "ADMIN")
 
-                        // 馃З ADMIN (gesti贸n cat谩logo)
-                        .requestMatchers(HttpMethod.POST,   "/products/**", "/categories/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT,    "/products/**", "/categories/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/products/**", "/categories/**").hasRole("ADMIN")
+                        // Rutas de Admin
+                        .requestMatchers(HttpMethod.POST, "/products/**", "/categories/**", "/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/products/**", "/categories/**", "/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/products/**", "/categories/**", "/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/products/**").hasRole("ADMIN") // Agregado para tu toggle activo
 
-                        // 馃懁 ADMIN (gesti贸n de usuarios)
-                        .requestMatchers(HttpMethod.POST, "/users/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/users/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
-
-                        // 馃懃 USER o ADMIN pueden leer sus datos personales
+                        // Usuario logueado
                         .requestMatchers(HttpMethod.GET, "/users/email/**").authenticated()
 
-                        // 馃П Todo lo dem谩s requiere autenticaci贸n
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sm -> sm.sessionCreationPolicy(STATELESS))
@@ -71,5 +71,18 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174")); // Puertos de Vite
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
+        configuration.setAllowCredentials(true); // Permitir credenciales/cookies si fuera necesario
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

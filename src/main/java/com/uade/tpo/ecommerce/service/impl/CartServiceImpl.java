@@ -60,6 +60,7 @@ public class CartServiceImpl implements CartService {
         if (qty <= 0) {
             throw new IllegalArgumentException("quantity inválida (debe ser > 0)");
         }
+        
 
         // Traer producto y validar stock SOLO del producto elegido
         Product product = products.findById(ir.getProductId())

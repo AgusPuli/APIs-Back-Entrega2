@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/carts")
+@CrossOrigin(origins = "http://localhost:5173")
 public class CartsController {
 
     @Autowired

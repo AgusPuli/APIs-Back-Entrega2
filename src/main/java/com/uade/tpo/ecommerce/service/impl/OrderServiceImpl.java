@@ -1,7 +1,6 @@
 package com.uade.tpo.ecommerce.service.impl;
 
-import com.uade.tpo.ecommerce.controllers.orders.OrderItemRequest;
-import com.uade.tpo.ecommerce.controllers.orders.OrderRequest;
+import com.uade.tpo.ecommerce.controllers.orders.CheckoutRequest; // 👈 Importar DTO
 import com.uade.tpo.ecommerce.entity.*;
 import com.uade.tpo.ecommerce.exceptions.*;
 import com.uade.tpo.ecommerce.repository.*;
@@ -24,11 +23,69 @@ public class OrderServiceImpl implements OrderService {
     @Autowired private ProductRepository products;
     @Autowired private CartRepository carts;
 
-    // Checkout desde carrito
+    // ✅ NUEVO MÉTODO: Crear orden desde el Frontend (Redux)
+    @Override
+    @Transactional
+    public Order createOrderFromPayload(String email, CheckoutRequest request) {
+        // 1. Buscar usuario autenticado
+        User user = users.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado: " + email));
+
+        // 2. Crear estructura de la orden
+        Order order = Order.builder()
+                .user(user)
+                .status(OrderStatus.PENDING)
+                .total(request.getTotal()) // El total viene calculado del front (o recalcular aquí por seguridad)
+                //.createdAt(new Date()) // Si tu entidad no tiene @PrePersist
+                .build();
+
+        List<OrderItem> items = new ArrayList<>();
+
+        // 3. Procesar cada item del JSON
+        for (CheckoutRequest.CheckoutItem itemReq : request.getItems()) {
+            Product product = products.findById(itemReq.getProductId())
+                    .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado ID: " + itemReq.getProductId()));
+
+            // 4. Validar Stock
+            if (product.getStock() < itemReq.getQuantity()) {
+                throw new IllegalArgumentException("No hay suficiente stock para: " + product.getName());
+            }
+
+            // 5. Descontar Stock
+            product.setStock(product.getStock() - itemReq.getQuantity());
+            products.save(product);
+
+            // 6. Crear OrderItem
+            BigDecimal lineSubtotal = itemReq.getPrice().multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+
+            OrderItem orderItem = OrderItem.builder()
+                    .order(order)
+                    .product(product)
+                    .quantity(itemReq.getQuantity())
+                    .unitPrice(itemReq.getPrice())
+                    .subtotal(lineSubtotal)
+                    .build();
+
+            items.add(orderItem);
+        }
+
+        order.setItems(items);
+
+        // Guardamos la orden (esto generará el ID)
+        return orders.save(order);
+    }
+
+    // --- MÉTODOS ANTERIORES (Se mantienen igual) ---
+
+    @Override
     @Transactional
     public Order createFromCart(Long userId) {
         Cart cart = carts.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("No existe carrito para userId=" + userId));
+
+        if (cart.getUser().getId() == null) {
+            throw new IllegalArgumentException("El ID no puede ser null");
+        }
 
         if (cart.getItems() == null || cart.getItems().isEmpty()) {
             throw new IllegalArgumentException("El carrito está vacío");
@@ -46,6 +103,13 @@ public class OrderServiceImpl implements OrderService {
             Product product = ci.getProduct();
             int qty = ci.getQuantity();
 
+            // Validar stock también aquí si se usa este método
+            if (product.getStock() < qty) {
+                throw new IllegalArgumentException("Sin stock para " + product.getName());
+            }
+            product.setStock(product.getStock() - qty);
+            products.save(product);
+
             BigDecimal unitPrice = Optional.ofNullable(product.getPrice()).orElse(BigDecimal.ZERO);
             BigDecimal lineSubtotal = unitPrice.multiply(BigDecimal.valueOf(qty));
 
@@ -62,7 +126,6 @@ public class OrderServiceImpl implements OrderService {
             items.add(item);
         }
 
-        // aplicar descuento del carrito
         BigDecimal pct = Optional.ofNullable(cart.getDiscountPercentage()).orElse(BigDecimal.ZERO);
         if (pct.compareTo(BigDecimal.ZERO) < 0) pct = BigDecimal.ZERO;
         if (pct.compareTo(BigDecimal.valueOf(100)) > 0) pct = BigDecimal.valueOf(100);
@@ -80,10 +143,7 @@ public class OrderServiceImpl implements OrderService {
         order.setTotal(total.setScale(2, RoundingMode.HALF_UP));
 
         Order saved = orders.save(order);
-
-        // limpiar carrito después del checkout
-        carts.delete(cart);
-
+        carts.delete(cart); // Borrar carrito de BD
         return saved;
     }
 

@@ -2,19 +2,22 @@ package com.uade.tpo.ecommerce.service;
 
 import com.uade.tpo.ecommerce.entity.Order;
 import com.uade.tpo.ecommerce.entity.OrderStatus;
-import com.uade.tpo.ecommerce.controllers.orders.OrderRequest;
+import com.uade.tpo.ecommerce.controllers.orders.CheckoutRequest; // 👈 Importante: Importar tu DTO
 import org.springframework.data.domain.*;
 
 public interface OrderService {
-    public Order createFromCart(Long userId);
+    // Mantenemos el viejo por si acaso, pero agregamos este NUEVO:
+    Order createOrderFromPayload(String email, CheckoutRequest request);
 
-    public Order getOrderById(Long orderId);
+    Order createFromCart(Long userId);
 
-    public Page<Order> listOrders(Pageable pageable);
+    Order getOrderById(Long orderId);
 
-    public Page<Order> listByUser(Long userId, Pageable pageable);
+    Page<Order> listOrders(Pageable pageable);
 
-    public Order updateStatus(Long orderId, OrderStatus status);
+    Page<Order> listByUser(Long userId, Pageable pageable);
 
-    public void delete(Long orderId);
+    Order updateStatus(Long orderId, OrderStatus status);
+
+    void delete(Long orderId);
 }

@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("admin/discounts")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AdminDiscountsController {
 
     @Autowired
