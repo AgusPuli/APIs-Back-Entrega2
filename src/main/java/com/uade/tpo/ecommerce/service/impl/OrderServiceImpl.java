@@ -1,6 +1,6 @@
 package com.uade.tpo.ecommerce.service.impl;
 
-import com.uade.tpo.ecommerce.controllers.orders.CheckoutRequest; // 👈 Importar DTO
+import com.uade.tpo.ecommerce.controllers.orders.CheckoutRequest;
 import com.uade.tpo.ecommerce.entity.*;
 import com.uade.tpo.ecommerce.exceptions.*;
 import com.uade.tpo.ecommerce.repository.*;
@@ -23,7 +23,7 @@ public class OrderServiceImpl implements OrderService {
     @Autowired private ProductRepository products;
     @Autowired private CartRepository carts;
 
-    // ✅ NUEVO MÉTODO: Crear orden desde el Frontend (Redux)
+    // ✅ MÉTODO 1: Crear orden desde el Frontend (Redux Payload)
     @Override
     @Transactional
     public Order createOrderFromPayload(String email, CheckoutRequest request) {
@@ -31,17 +31,20 @@ public class OrderServiceImpl implements OrderService {
         User user = users.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado: " + email));
 
-        // 2. Crear estructura de la orden
+        // 2. Crear estructura básica de la orden (con valores iniciales para evitar nulos)
         Order order = Order.builder()
                 .user(user)
                 .status(OrderStatus.PENDING)
-                .total(request.getTotal()) // El total viene calculado del front (o recalcular aquí por seguridad)
-                //.createdAt(new Date()) // Si tu entidad no tiene @PrePersist
+                .total(request.getTotal())
+                .discountAmount(BigDecimal.ZERO) // Evita error not-null
+                .discountPercent(BigDecimal.ZERO) // Evita error not-null
+                .discountCode(request.getDiscountCode()) // Si el request lo trae (o null)
                 .build();
 
         List<OrderItem> items = new ArrayList<>();
+        BigDecimal calculatedSubtotal = BigDecimal.ZERO;
 
-        // 3. Procesar cada item del JSON
+        // 3. Procesar cada item del JSON (Lógica restaurada)
         for (CheckoutRequest.CheckoutItem itemReq : request.getItems()) {
             Product product = products.findById(itemReq.getProductId())
                     .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado ID: " + itemReq.getProductId()));
@@ -55,8 +58,11 @@ public class OrderServiceImpl implements OrderService {
             product.setStock(product.getStock() - itemReq.getQuantity());
             products.save(product);
 
-            // 6. Crear OrderItem
+            // 6. Calcular subtotal de la línea
             BigDecimal lineSubtotal = itemReq.getPrice().multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+
+            // 7. Sumar al acumulador
+            calculatedSubtotal = calculatedSubtotal.add(lineSubtotal);
 
             OrderItem orderItem = OrderItem.builder()
                     .order(order)
@@ -71,12 +77,19 @@ public class OrderServiceImpl implements OrderService {
 
         order.setItems(items);
 
-        // Guardamos la orden (esto generará el ID)
-        return orders.save(order);
+        // 8. Asignar el subtotal calculado
+        order.setSubtotal(calculatedSubtotal);
+
+        // 9. Guardar la orden
+        Order savedOrder = orders.save(order);
+
+        // 10. Limpieza opcional: Si el usuario tenía un carrito en BD, lo borramos para sincronizar
+        carts.findByUserId(user.getId()).ifPresent(cart -> carts.delete(cart));
+
+        return savedOrder;
     }
 
-    // --- MÉTODOS ANTERIORES (Se mantienen igual) ---
-
+    // --- MÉTODO 2: Crear desde Carrito BD (Legacy) ---
     @Override
     @Transactional
     public Order createFromCart(Long userId) {
@@ -103,7 +116,6 @@ public class OrderServiceImpl implements OrderService {
             Product product = ci.getProduct();
             int qty = ci.getQuantity();
 
-            // Validar stock también aquí si se usa este método
             if (product.getStock() < qty) {
                 throw new IllegalArgumentException("Sin stock para " + product.getName());
             }
@@ -143,7 +155,7 @@ public class OrderServiceImpl implements OrderService {
         order.setTotal(total.setScale(2, RoundingMode.HALF_UP));
 
         Order saved = orders.save(order);
-        carts.delete(cart); // Borrar carrito de BD
+        carts.delete(cart);
         return saved;
     }
 

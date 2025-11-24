@@ -40,7 +40,6 @@ public class PaymentsController {
         return new PaymentResponse(method, status, orderId);
     }
 
-    // 🔹 NUEVO ENDPOINT: Obtener pagos del usuario autenticado
     @GetMapping("/my-payments")
     public ResponseEntity<List<PaymentResponse>> getMyPayments(
             @AuthenticationPrincipal UserDetails userDetails) {

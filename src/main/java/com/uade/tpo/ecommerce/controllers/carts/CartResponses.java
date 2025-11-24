@@ -8,9 +8,10 @@ public final class CartResponses {
     public record CartItemResponse(
             Long productId,
             String name,
-            BigDecimal price,     // <- viene de Product.getPrice()
+            BigDecimal price,
             Integer quantity,
-            BigDecimal subtotal
+            BigDecimal subtotal,
+            Integer stock // ✅ Nuevo campo: Stock disponible
     ) {}
 
     public record CartResponse(

@@ -53,7 +53,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/products/**", "/categories/**").permitAll()
 
                         // Rutas protegidas
-                        .requestMatchers("/cart/**", "/orders/**", "/payments/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/cart/**","/carts/**", "/orders/**", "/payments/**").hasAnyRole("USER", "ADMIN")
 
                         // Rutas de Admin
                         .requestMatchers(HttpMethod.POST, "/products/**", "/categories/**", "/users/**").hasRole("ADMIN")

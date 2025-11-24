@@ -10,7 +10,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CheckoutRequest {
-    // ⚠️ IMPORTANTE: El nombre de este campo debe coincidir con el JSON del frontend
     private List<CheckoutItem> items;
     private BigDecimal total;
     private String discountCode; // Si lo usas

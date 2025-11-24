@@ -72,13 +72,17 @@ public class CartMapper {
     private CartItemResponse toItem(CartItem i) {
         Product p = i.getProduct();
         Long productId = (p != null) ? p.getId() : null;
-        String name    = (p != null) ? p.getName() : null;
+        String name    = (p != null) ? p.getName() : "Producto desconocido";
         BigDecimal price = (p != null && p.getPrice() != null) ? p.getPrice() : BigDecimal.ZERO;
+
+        // ✅ Extraer stock (si p es null, stock es 0)
+        Integer stock = (p != null && p.getStock() != null) ? p.getStock() : 0;
 
         int qty = i.getQuantity() == null ? 0 : i.getQuantity();
         BigDecimal subtotal = price.multiply(BigDecimal.valueOf(qty));
 
-        return new CartItemResponse(productId, name, price, qty, subtotal);
+        // ✅ Pasar stock al constructor del record
+        return new CartItemResponse(productId, name, price, qty, subtotal, stock);
     }
 
     private BigDecimal nz(BigDecimal v) { return v == null ? BigDecimal.ZERO : v; }

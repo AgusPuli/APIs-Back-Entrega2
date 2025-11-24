@@ -22,27 +22,30 @@ public class OrdersController {
     @Autowired private UserRepository users;
     @Autowired private OrderMapper mapper;
 
-    // ---- helper para sacar userId del token ----
-    private Long currentUserId(Authentication auth) {
+    // ---- helper para sacar el email del token ----
+    private String currentUserEmail(Authentication auth) {
         if (auth == null || !(auth.getPrincipal() instanceof UserDetails ud)) {
             throw new IllegalArgumentException("No autenticado");
         }
-        String username = ud.getUsername();
-        User u = users.findByEmail(username)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
-        return u.getId();
+        return ud.getUsername();
     }
 
-    // Checkout desde el carrito del usuario autenticado
+    // ✅ UPDATED CHECKOUT METHOD
     @PostMapping("/checkout")
     @ResponseStatus(HttpStatus.CREATED)
-    public OrderResponses.OrderDetailResponse checkout(Authentication auth) {
-        Long userId = currentUserId(auth);
-        Order o = service.createFromCart(userId);
+    public OrderResponses.OrderDetailResponse checkout(
+            Authentication auth,
+            @RequestBody CheckoutRequest request // 👈 Recibe el JSON con los items
+    ) {
+        String email = currentUserEmail(auth);
+
+        // 🛑 Calls the NEW service method that uses the payload
+        Order o = service.createOrderFromPayload(email, request);
+
         return mapper.toDetail(o);
     }
 
-    // ---- lecturas y administración ----
+    // ---- lecturas y administración (No changes needed below) ----
 
     @GetMapping("/{id}")
     public OrderResponses.OrderDetailResponse get(@PathVariable Long id) {
