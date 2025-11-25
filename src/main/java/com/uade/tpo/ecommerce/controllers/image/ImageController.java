@@ -2,61 +2,75 @@ package com.uade.tpo.ecommerce.controllers.image;
 
 import com.uade.tpo.ecommerce.entity.Image;
 import com.uade.tpo.ecommerce.service.ImageService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Base64;
 
 @RestController
-@RequestMapping("/products/{productId}/image")
-@RequiredArgsConstructor
+@RequestMapping("/products") // 👈 La ruta base coincide con tu frontend
+@CrossOrigin(origins = "http://localhost:5173")
 public class ImageController {
 
-    private final ImageService imageService;
+    @Autowired
+    private ImageService imageService;
 
-    // Subir/Reemplazar (multipart con @ModelAttribute para mapear AddFileRequest)
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ImageResponse> upload(@PathVariable Long productId,
-                                                @ModelAttribute AddFileRequest request) {
-        Image saved = imageService.create(productId, request);
-        String base64 = Base64.getEncoder().encodeToString(saved.getImage());
+    // ✅ 1. MÉTODO POST: Para SUBIR la imagen (Este te faltaba)
+    @PostMapping(value = "/{productId}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ImageResponse> upload(
+            @PathVariable Long productId,
+            @RequestParam("file") MultipartFile file // 👈 Recibimos el archivo directo
+    ) {
+        System.out.println("📸 Intentando subir imagen para Producto ID: " + productId);
 
-        ImageResponse resp = ImageResponse.builder()
-                .id(saved.getId())
-                .file(base64) // si preferís, podés devolver una URL en vez del base64
-                .build();
+        try {
+            // Creamos el request manual para el servicio
+            AddFileRequest request = new AddFileRequest();
+            request.setFile(file);
 
-        return ResponseEntity.ok(resp);
+            Image saved = imageService.create(productId, request);
+            String base64 = Base64.getEncoder().encodeToString(saved.getImage());
+
+            ImageResponse resp = ImageResponse.builder()
+                    .id(saved.getId())
+                    .file(base64)
+                    .build();
+
+            return ResponseEntity.ok(resp);
+
+        } catch (Exception e) {
+            System.err.println("❌ Error subiendo imagen: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
-    // Descargar como binario (útil para <img src>)
-    @GetMapping("/raw")
+    // ✅ 2. MÉTODO GET: Para VER la imagen (Con protección anti-crash)
+    @GetMapping("/{productId}/image/raw")
     public ResponseEntity<byte[]> downloadRaw(@PathVariable Long productId) {
-        Image img = imageService.viewByProductId(productId);
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"image_" + productId + ".jpg\"")
-                .contentType(MediaType.IMAGE_JPEG) // si querés soportar varios tipos, guarda contentType en la entidad
-                .body(img.getImage());
+        try {
+            byte[] image = imageService.viewByProductId(productId).getImage();
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(image);
+
+        } catch (Exception e) {
+            // Si no hay imagen, devolvemos 404 silencioso para no romper el frontend
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    // Obtener como base64 (compatible con tu ImageResponse)
-    @GetMapping
-    public ResponseEntity<ImageResponse> downloadBase64(@PathVariable Long productId) {
-        Image img = imageService.viewByProductId(productId);
-        String base64 = Base64.getEncoder().encodeToString(img.getImage());
-        return ResponseEntity.ok(ImageResponse.builder()
-                .id(img.getId())
-                .file(base64)
-                .build());
-    }
-
-    @DeleteMapping
+    // ✅ 3. MÉTODO DELETE (Opcional, por si borras productos)
+    @DeleteMapping("/{productId}/image")
     public ResponseEntity<Void> delete(@PathVariable Long productId) {
-        imageService.deleteByProductId(productId);
-        return ResponseEntity.noContent().build();
+        try {
+            imageService.deleteByProductId(productId);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

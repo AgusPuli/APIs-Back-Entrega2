@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("categories")
+@CrossOrigin(origins = "http://localhost:5173")
 public class CategoriesController {
 
     @Autowired private CategoryService categoryService;

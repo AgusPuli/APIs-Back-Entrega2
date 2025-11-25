@@ -8,5 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 public class CartAddRequest {
     private Long userId;
-    private CartItemRequest item;
+    private Long productId;
+    private Integer quantity;
 }

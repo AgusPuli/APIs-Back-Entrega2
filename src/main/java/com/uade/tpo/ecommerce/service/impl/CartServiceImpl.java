@@ -46,13 +46,13 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Cart addItem(CartAddRequest request) {
-        if (request == null || request.getUserId() == null || request.getItem() == null) {
+        if (request == null || request.getUserId() == null || request.getProductId() == null) {
             throw new IllegalArgumentException("userId e item son requeridos");
         }
 
         Cart cart = getByUser(request.getUserId());
 
-        CartItemRequest ir = request.getItem();
+        CartAddRequest ir = request;
         if (ir.getProductId() == null) {
             throw new IllegalArgumentException("productId es requerido");
         }
@@ -60,6 +60,7 @@ public class CartServiceImpl implements CartService {
         if (qty <= 0) {
             throw new IllegalArgumentException("quantity inválida (debe ser > 0)");
         }
+        
 
         // Traer producto y validar stock SOLO del producto elegido
         Product product = products.findById(ir.getProductId())
